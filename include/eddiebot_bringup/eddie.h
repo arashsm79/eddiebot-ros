@@ -35,29 +35,28 @@
 
 #ifndef _EDDIE_H
 #define	_EDDIE_H
-//#include <stdlib.h>
-//#include <stdio.h>
-//#include <unistd.h>
-#include "rclcpp/rclcpp.hpp"
+
 #include <fcntl.h>
 #include <termios.h>
 #include <semaphore.h>
 #include <string>
 #include <sstream>
 #include <map>
-#include <eddiebot_msgs/Ping.h>
-#include <eddiebot_msgs/ADC.h>
-#include <eddiebot_msgs/Accelerate.h>
-#include <eddiebot_msgs/DriveWithDistance.h>
-#include <eddiebot_msgs/DriveWithPower.h>
-#include <eddiebot_msgs/DriveWithSpeed.h>
-#include <eddiebot_msgs/GetDistance.h>
-#include <eddiebot_msgs/GetHeading.h>
-#include <eddiebot_msgs/GetSpeed.h>
-#include <eddiebot_msgs/ResetEncoder.h>
-#include <eddiebot_msgs/Rotate.h>
-#include <eddiebot_msgs/StopAtDistance.h>
-#include <eddiebot_msgs/Encoders.h>
+
+#include "rclcpp/rclcpp.hpp"
+#include "eddiebot_msgs/msg/adc.hpp"
+#include "eddiebot_msgs/msg/encoders.hpp"
+#include "eddiebot_msgs/msg/ping.hpp"
+#include "eddiebot_msgs/srv/accelerate.hpp"
+#include "eddiebot_msgs/srv/drive_with_distance.hpp"
+#include "eddiebot_msgs/srv/drive_with_power.hpp"
+#include "eddiebot_msgs/srv/drive_with_speed.hpp"
+#include "eddiebot_msgs/srv/get_distance.hpp"
+#include "eddiebot_msgs/srv/get_heading.hpp"
+#include "eddiebot_msgs/srv/get_speed.hpp"
+#include "eddiebot_msgs/srv/reset_encoder.hpp"
+#include "eddiebot_msgs/srv/rotate.hpp"
+#include "eddiebot_msgs/srv/stop_at_distance.hpp"
 
 class Eddie {
 public:
@@ -211,23 +210,23 @@ private:
     struct termios tio;
     int tty_fd;
 
-    ros::NodeHandle node_handle_;
+    rclcpp::NodeHandle node_handle_;
 
-    ros::Publisher ping_pub_;
-    ros::Publisher adc_pub_;
+    rclcpp::Publisher ping_pub_;
+    rclcpp::Publisher adc_pub_;
     // encoder_pub_ pulishes encoder data from left and right encoders
-    ros::Publisher encoder_pub_;
+    rclcpp::Publisher encoder_pub_;
 
-    ros::ServiceServer accelerate_srv_;
-    ros::ServiceServer drive_with_distance_srv_;
-    ros::ServiceServer drive_with_power_srv_;
-    ros::ServiceServer drive_with_speed_srv_;
-    ros::ServiceServer get_distance_srv_;
-    ros::ServiceServer get_heading_srv_;
-    ros::ServiceServer get_speed_srv_;
-    ros::ServiceServer reset_encoder_srv_;
-    ros::ServiceServer rotate_srv_;
-    ros::ServiceServer stop_at_distance_srv_;
+    rclcpp::ServiceServer accelerate_srv_;
+    rclcpp::ServiceServer drive_with_distance_srv_;
+    rclcpp::ServiceServer drive_with_power_srv_;
+    rclcpp::ServiceServer drive_with_speed_srv_;
+    rclcpp::ServiceServer get_distance_srv_;
+    rclcpp::ServiceServer get_heading_srv_;
+    rclcpp::ServiceServer get_speed_srv_;
+    rclcpp::ServiceServer reset_encoder_srv_;
+    rclcpp::ServiceServer rotate_srv_;
+    rclcpp::ServiceServer stop_at_distance_srv_;
 
     void initialize(std::string port);
     std::string command(std::string str);
@@ -236,33 +235,33 @@ private:
     std::string generateCommand(std::string str1, int num1);
     std::string generateCommand(std::string str1, int num1, int num2);
 
-    bool accelerate(eddiebot_msgs::Accelerate::Request &req,
-            eddiebot_msgs::Accelerate::Response &res);
-    bool driveWithDistance(eddiebot_msgs::DriveWithDistance::Request &req,
-            eddiebot_msgs::DriveWithDistance::Response &res);
-    bool driveWithPower(eddiebot_msgs::DriveWithPower::Request &req,
-            eddiebot_msgs::DriveWithPower::Response &res);
-    bool driveWithSpeed(eddiebot_msgs::DriveWithSpeed::Request &req,
-            eddiebot_msgs::DriveWithSpeed::Response &res);
-    bool getDistance(eddiebot_msgs::GetDistance::Request &req,
-            eddiebot_msgs::GetDistance::Response &res);
-    bool getHeading(eddiebot_msgs::GetHeading::Request &req,
-            eddiebot_msgs::GetHeading::Response &res);
-    bool GetSpeed(eddiebot_msgs::GetSpeed::Request &req,
-            eddiebot_msgs::GetSpeed::Response &res);
-    bool resetEncoder(eddiebot_msgs::ResetEncoder::Request &req,
-            eddiebot_msgs::ResetEncoder::Response &res);
-    bool rotate(eddiebot_msgs::Rotate::Request &req,
-            eddiebot_msgs::Rotate::Response &res);
-    bool stopAtDistance(eddiebot_msgs::StopAtDistance::Request &req,
-            eddiebot_msgs::StopAtDistance::Response &res);
+    bool accelerate(eddiebot_msgs::srv::Accelerate::Request &req,
+            eddiebot_msgs::srv::Accelerate::Response &res);
+    bool driveWithDistance(eddiebot_msgs::srv::DriveWithDistance::Request &req,
+            eddiebot_msgs::srv::DriveWithDistance::Response &res);
+    bool driveWithPower(eddiebot_msgs::srv::DriveWithPower::Request &req,
+            eddiebot_msgs::srv::DriveWithPower::Response &res);
+    bool driveWithSpeed(eddiebot_msgs::srv::DriveWithSpeed::Request &req,
+            eddiebot_msgs::srv::DriveWithSpeed::Response &res);
+    bool getDistance(eddiebot_msgs::srv::GetDistance::Request &req,
+            eddiebot_msgs::srv::GetDistance::Response &res);
+    bool getHeading(eddiebot_msgs::srv::GetHeading::Request &req,
+            eddiebot_msgs::srv::GetHeading::Response &res);
+    bool GetSpeed(eddiebot_msgs::srv::GetSpeed::Request &req,
+            eddiebot_msgs::srv::GetSpeed::Response &res);
+    bool resetEncoder(eddiebot_msgs::srv::ResetEncoder::Request &req,
+            eddiebot_msgs::srv::ResetEncoder::Response &res);
+    bool rotate(eddiebot_msgs::srv::Rotate::Request &req,
+            eddiebot_msgs::srv::Rotate::Response &res);
+    bool stopAtDistance(eddiebot_msgs::srv::StopAtDistance::Request &req,
+            eddiebot_msgs::srv::StopAtDistance::Response &res);
 
     // get ping data from eddiebot through seiral port
-    eddiebot_msgs::Ping getPingData();
+    eddiebot_msgs::msg::Ping getPingData();
     // get adc data from eddiebot through serial port
-    eddiebot_msgs::ADC getADCData();
+    eddiebot_msgs::msg::ADC getADCData();
     // get encoder data from eddiebot through serial port
-    bool getEncodersData(eddiebot_msgs::Encoders &data);
+    bool getEncodersData(eddiebot_msgs::msg::Encoders &data);
 };
 
 #endif	/* _EDDIE_H */
