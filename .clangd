@@ -7,7 +7,6 @@ CompileFlags:
 Diagnostics:
   # Tweak Clang-Tidy checks.
   ClangTidy:
-    Add: [performance*, modernize*, readability*]
-    Remove: [modernize-use-trailing-return-type]
+    Remove: [misc-unused-parameters, modernize-use-trailing-return-type]
     CheckOptions:
       readability-identifier-naming.VariableCase: CamelCase

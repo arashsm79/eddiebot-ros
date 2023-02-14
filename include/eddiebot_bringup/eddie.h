@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2012, Haikal Pribadi <haikal.pribadi@gmail.com>
  * Copyright (c) 2018, Zeyu Zhang <zeyuz@outlook.com>
+ * Copyright (c) 2023, Arash Sal Moslehian <arashsm79@yahoo.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +61,7 @@
 
 class Eddie {
 public:
-    Eddie();
+    Eddie(std::shared_ptr<rclcpp::Node>);
     virtual ~Eddie();
 
     //==============================================//
@@ -210,7 +211,7 @@ private:
     struct termios tio;
     int tty_fd;
 
-    rclcpp::Node node_handle_;
+    std::shared_ptr<rclcpp::Node> node_handle_;
 
     rclcpp::Publisher<eddiebot_msgs::msg::Ping>::SharedPtr ping_pub_;
     rclcpp::Publisher<eddiebot_msgs::msg::ADC>::SharedPtr adc_pub_;
