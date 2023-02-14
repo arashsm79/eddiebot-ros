@@ -210,23 +210,23 @@ private:
     struct termios tio;
     int tty_fd;
 
-    rclcpp::NodeHandle node_handle_;
+    rclcpp::Node node_handle_;
 
-    rclcpp::Publisher ping_pub_;
-    rclcpp::Publisher adc_pub_;
+    rclcpp::Publisher<eddiebot_msgs::msg::Ping>::SharedPtr ping_pub_;
+    rclcpp::Publisher<eddiebot_msgs::msg::ADC>::SharedPtr adc_pub_;
     // encoder_pub_ pulishes encoder data from left and right encoders
-    rclcpp::Publisher encoder_pub_;
+    rclcpp::Publisher<eddiebot_msgs::msg::Encoders>::SharedPtr encoder_pub_;
 
-    rclcpp::ServiceServer accelerate_srv_;
-    rclcpp::ServiceServer drive_with_distance_srv_;
-    rclcpp::ServiceServer drive_with_power_srv_;
-    rclcpp::ServiceServer drive_with_speed_srv_;
-    rclcpp::ServiceServer get_distance_srv_;
-    rclcpp::ServiceServer get_heading_srv_;
-    rclcpp::ServiceServer get_speed_srv_;
-    rclcpp::ServiceServer reset_encoder_srv_;
-    rclcpp::ServiceServer rotate_srv_;
-    rclcpp::ServiceServer stop_at_distance_srv_;
+    rclcpp::Service<eddiebot_msgs::srv::Accelerate>::SharedPtr accelerate_srv_;
+    rclcpp::Service<eddiebot_msgs::srv::DriveWithDistance>::SharedPtr drive_with_distance_srv_;
+    rclcpp::Service<eddiebot_msgs::srv::DriveWithPower>::SharedPtr drive_with_power_srv_;
+    rclcpp::Service<eddiebot_msgs::srv::DriveWithSpeed>::SharedPtr drive_with_speed_srv_;
+    rclcpp::Service<eddiebot_msgs::srv::GetDistance>::SharedPtr get_distance_srv_;
+    rclcpp::Service<eddiebot_msgs::srv::GetHeading>::SharedPtr get_heading_srv_;
+    rclcpp::Service<eddiebot_msgs::srv::GetSpeed>::SharedPtr get_speed_srv_;
+    rclcpp::Service<eddiebot_msgs::srv::ResetEncoder>::SharedPtr reset_encoder_srv_;
+    rclcpp::Service<eddiebot_msgs::srv::Rotate>::SharedPtr rotate_srv_;
+    rclcpp::Service<eddiebot_msgs::srv::StopAtDistance>::SharedPtr stop_at_distance_srv_;
 
     void initialize(std::string port);
     std::string command(std::string str);
