@@ -1,0 +1,8 @@
+launch:
+  - node:
+      pkg: "eddiebot_bringup"
+      name: "eddie"
+      exec: "eddie"
+      param:
+        - name: "serial_port"
+          value: "/dev/ttyUSB0"
