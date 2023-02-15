@@ -236,26 +236,27 @@ private:
     std::string generateCommand(std::string str1, int num1);
     std::string generateCommand(std::string str1, int num1, int num2);
 
-    bool accelerate(const std::shared_ptr<eddiebot_msgs::srv::Accelerate::Request> &req,
-            std::shared_ptr<eddiebot_msgs::srv::Accelerate::Response> &res);
-    bool driveWithDistance(const std::shared_ptr<eddiebot_msgs::srv::DriveWithDistance::Request> &req,
-            std::shared_ptr<eddiebot_msgs::srv::DriveWithDistance::Response> &res);
-    bool driveWithPower(const std::shared_ptr<eddiebot_msgs::srv::DriveWithPower::Request> &req,
-            std::shared_ptr<eddiebot_msgs::srv::DriveWithPower::Response> &res);
-    bool driveWithSpeed(const std::shared_ptr<eddiebot_msgs::srv::DriveWithSpeed::Request> &req,
-            std::shared_ptr<eddiebot_msgs::srv::DriveWithSpeed::Response> &res);
-    bool getDistance(const std::shared_ptr<eddiebot_msgs::srv::GetDistance::Request> &req,
-            std::shared_ptr<eddiebot_msgs::srv::GetDistance::Response> &res);
-    bool getHeading(const std::shared_ptr<eddiebot_msgs::srv::GetHeading::Request> &req,
-            std::shared_ptr<eddiebot_msgs::srv::GetHeading::Response> &res);
-    bool getSpeed(const std::shared_ptr<eddiebot_msgs::srv::GetSpeed::Request> &req,
-            std::shared_ptr<eddiebot_msgs::srv::GetSpeed::Response> &res);
-    bool resetEncoder(const std::shared_ptr<eddiebot_msgs::srv::ResetEncoder::Request> &req,
-            std::shared_ptr<eddiebot_msgs::srv::ResetEncoder::Response> &res);
-    bool rotate(const std::shared_ptr<eddiebot_msgs::srv::Rotate::Request> &req,
-            std::shared_ptr<eddiebot_msgs::srv::Rotate::Response> &res);
-    bool stopAtDistance(const std::shared_ptr<eddiebot_msgs::srv::StopAtDistance::Request> &req,
-            std::shared_ptr<eddiebot_msgs::srv::StopAtDistance::Response> &res);
+    bool accelerate(
+            const std::shared_ptr<eddiebot_msgs::srv::Accelerate::Request> req,
+            std::shared_ptr<eddiebot_msgs::srv::Accelerate::Response> res);
+    bool driveWithDistance(const std::shared_ptr<eddiebot_msgs::srv::DriveWithDistance::Request> req,
+            std::shared_ptr<eddiebot_msgs::srv::DriveWithDistance::Response> res);
+    bool driveWithPower(const std::shared_ptr<eddiebot_msgs::srv::DriveWithPower::Request> req,
+            std::shared_ptr<eddiebot_msgs::srv::DriveWithPower::Response> res);
+    bool driveWithSpeed(const std::shared_ptr<eddiebot_msgs::srv::DriveWithSpeed::Request> req,
+            std::shared_ptr<eddiebot_msgs::srv::DriveWithSpeed::Response> res);
+    bool getDistance(const std::shared_ptr<eddiebot_msgs::srv::GetDistance::Request> req,
+            std::shared_ptr<eddiebot_msgs::srv::GetDistance::Response> res);
+    bool getHeading(const std::shared_ptr<eddiebot_msgs::srv::GetHeading::Request> req,
+            std::shared_ptr<eddiebot_msgs::srv::GetHeading::Response> res);
+    bool getSpeed(const std::shared_ptr<eddiebot_msgs::srv::GetSpeed::Request> req,
+            std::shared_ptr<eddiebot_msgs::srv::GetSpeed::Response> res);
+    bool resetEncoder(const std::shared_ptr<eddiebot_msgs::srv::ResetEncoder::Request> req,
+            std::shared_ptr<eddiebot_msgs::srv::ResetEncoder::Response> res);
+    bool rotate(const std::shared_ptr<eddiebot_msgs::srv::Rotate::Request> req,
+            std::shared_ptr<eddiebot_msgs::srv::Rotate::Response> res);
+    bool stopAtDistance(const std::shared_ptr<eddiebot_msgs::srv::StopAtDistance::Request> req,
+            std::shared_ptr<eddiebot_msgs::srv::StopAtDistance::Response> res);
 
     // get ping data from eddiebot through seiral port
     eddiebot_msgs::msg::Ping getPingData();

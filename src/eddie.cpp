@@ -76,32 +76,50 @@ Eddie::Eddie(std::shared_ptr<rclcpp::Node> node_handle)
 
   accelerate_srv_ =
       node_handle_->create_service<eddiebot_msgs::srv::Accelerate>(
-          "acceleration_rate", &Eddie::accelerate);
+          "acceleration_rate",
+          std::bind(&Eddie::accelerate, this, std::placeholders::_1,
+                    std::placeholders::_2));
   drive_with_distance_srv_ =
       node_handle_->create_service<eddiebot_msgs::srv::DriveWithDistance>(
-          "drive_with_distance", &Eddie::driveWithDistance);
+          "drive_with_distance",
+          std::bind(&Eddie::driveWithDistance, this, std::placeholders::_1,
+                    std::placeholders::_2));
   drive_with_power_srv_ =
       node_handle_->create_service<eddiebot_msgs::srv::DriveWithPower>(
-          "drive_with_power", &Eddie::driveWithPower);
+          "drive_with_power",
+          std::bind(&Eddie::driveWithPower, this, std::placeholders::_1,
+                    std::placeholders::_2));
   drive_with_speed_srv_ =
       node_handle_->create_service<eddiebot_msgs::srv::DriveWithSpeed>(
-          "drive_with_speed", &Eddie::driveWithSpeed);
+          "drive_with_speed",
+          std::bind(&Eddie::driveWithSpeed, this, std::placeholders::_1,
+                    std::placeholders::_2));
   get_distance_srv_ =
       node_handle_->create_service<eddiebot_msgs::srv::GetDistance>(
-          "get_distance", &Eddie::getDistance);
+          "get_distance",
+          std::bind(&Eddie::getDistance, this, std::placeholders::_1,
+                    std::placeholders::_2));
   get_heading_srv_ =
       node_handle_->create_service<eddiebot_msgs::srv::GetHeading>(
-          "get_heading", &Eddie::getHeading);
+          "get_heading",
+          std::bind(&Eddie::getHeading, this, std::placeholders::_1,
+                    std::placeholders::_2));
   get_speed_srv_ = node_handle_->create_service<eddiebot_msgs::srv::GetSpeed>(
-      "get_speed", &Eddie::getSpeed);
+      "get_speed", std::bind(&Eddie::getSpeed, this, std::placeholders::_1,
+                             std::placeholders::_2));
   reset_encoder_srv_ =
       node_handle_->create_service<eddiebot_msgs::srv::ResetEncoder>(
-          "reset_encoder", &Eddie::resetEncoder);
+          "reset_encoder",
+          std::bind(&Eddie::resetEncoder, this, std::placeholders::_1,
+                    std::placeholders::_2));
   rotate_srv_ = node_handle_->create_service<eddiebot_msgs::srv::Rotate>(
-      "rotate", &Eddie::rotate);
+      "rotate", std::bind(&Eddie::rotate, this, std::placeholders::_1,
+                          std::placeholders::_2));
   stop_at_distance_srv_ =
       node_handle_->create_service<eddiebot_msgs::srv::StopAtDistance>(
-          "stop_at_distance", &Eddie::stopAtDistance);
+          "stop_at_distance",
+          std::bind(&Eddie::stopAtDistance, this, std::placeholders::_1,
+                    std::placeholders::_2));
 
   std::string port =
       node_handle_
@@ -141,6 +159,7 @@ void Eddie::initialize(std::string port) {
 std::string Eddie::command(std::string str) {
   sem_wait(&mutex);
   ssize_t _written;
+  (void) _written;
   std::stringstream result("");
   int count = 0;
   unsigned char c;
@@ -299,11 +318,13 @@ void Eddie::publishEncodersData() {
     encoder_pub_->publish(encoders_data);
 }
 
-bool Eddie::accelerate(const std::shared_ptr<eddiebot_msgs::srv::Accelerate::Request> &req,
-                       std::shared_ptr<eddiebot_msgs::srv::Accelerate::Response> &res) {
+bool Eddie::accelerate(
+    const std::shared_ptr<eddiebot_msgs::srv::Accelerate::Request> req,
+    std::shared_ptr<eddiebot_msgs::srv::Accelerate::Response> res) {
   // this feature does not need to validate the parameters due the limited range
   // of parameter data type
   std::string cmd;
+  (void) res;
   cmd = generateCommand(SET_RAMPING_VALUE_STRING, req->rate);
   std::string cmd_response = command(cmd);
   if (cmd_response == "\r")
@@ -313,10 +334,11 @@ bool Eddie::accelerate(const std::shared_ptr<eddiebot_msgs::srv::Accelerate::Req
 }
 
 bool Eddie::driveWithDistance(
-    const std::shared_ptr<eddiebot_msgs::srv::DriveWithDistance::Request> &req,
-    std::shared_ptr<eddiebot_msgs::srv::DriveWithDistance::Response> &res) {
+    const std::shared_ptr<eddiebot_msgs::srv::DriveWithDistance::Request> req,
+    std::shared_ptr<eddiebot_msgs::srv::DriveWithDistance::Response> res) {
   // this feature does not need to validate the parameters due the limited range
   // of parameter data type
+  (void) res;
   std::string cmd;
   cmd = generateCommand(SET_DRIVE_DISTANCE_STRING, req->distance, req->speed);
   std::string cmd_response = command(cmd);
@@ -326,8 +348,10 @@ bool Eddie::driveWithDistance(
     return false;
 }
 
-bool Eddie::driveWithPower(const std::shared_ptr<eddiebot_msgs::srv::DriveWithPower::Request> &req,
-                           std::shared_ptr<eddiebot_msgs::srv::DriveWithPower::Response> &res) {
+bool Eddie::driveWithPower(
+    const std::shared_ptr<eddiebot_msgs::srv::DriveWithPower::Request> req,
+    std::shared_ptr<eddiebot_msgs::srv::DriveWithPower::Response> res) {
+  (void) res;
   if (req->left > MOTOR_POWER_MAX_FORWARD ||
       req->right > MOTOR_POWER_MAX_FORWARD ||
       req->left < MOTOR_POWER_MAX_REVERSE ||
@@ -345,8 +369,10 @@ bool Eddie::driveWithPower(const std::shared_ptr<eddiebot_msgs::srv::DriveWithPo
   }
 }
 
-bool Eddie::driveWithSpeed(const std::shared_ptr<eddiebot_msgs::srv::DriveWithSpeed::Request> &req,
-                           std::shared_ptr<eddiebot_msgs::srv::DriveWithSpeed::Response> &res) {
+bool Eddie::driveWithSpeed(
+    const std::shared_ptr<eddiebot_msgs::srv::DriveWithSpeed::Request> req,
+    std::shared_ptr<eddiebot_msgs::srv::DriveWithSpeed::Response> res) {
+  (void) res;
   if (req->left > TRAVEL_SPEED_MAX_FORWARD ||
       req->right > TRAVEL_SPEED_MAX_FORWARD ||
       req->left < TRAVEL_SPEED_MAX_REVERSE ||
@@ -362,8 +388,11 @@ bool Eddie::driveWithSpeed(const std::shared_ptr<eddiebot_msgs::srv::DriveWithSp
     return false;
 }
 
-bool Eddie::getDistance(const std::shared_ptr<eddiebot_msgs::srv::GetDistance::Request> &req,
-                        std::shared_ptr<eddiebot_msgs::srv::GetDistance::Response> &res) {
+bool Eddie::getDistance(
+    const std::shared_ptr<eddiebot_msgs::srv::GetDistance::Request> req,
+    std::shared_ptr<eddiebot_msgs::srv::GetDistance::Response> res) {
+  (void) res;
+  (void) req;
   std::string cmd = GET_ENCODER_TICKS_STRING;
   std::string cmd_response = command(cmd);
   if (cmd_response.substr(0, 5) != "ERROR" && cmd_response.size() >= 18) {
@@ -379,8 +408,11 @@ bool Eddie::getDistance(const std::shared_ptr<eddiebot_msgs::srv::GetDistance::R
     return false;
 }
 
-bool Eddie::getHeading(const std::shared_ptr<eddiebot_msgs::srv::GetHeading::Request> &req,
-                       std::shared_ptr<eddiebot_msgs::srv::GetHeading::Response> &res) {
+bool Eddie::getHeading(
+    const std::shared_ptr<eddiebot_msgs::srv::GetHeading::Request> req,
+    std::shared_ptr<eddiebot_msgs::srv::GetHeading::Response> res) {
+  (void) res;
+  (void) req;
   std::string cmd = GET_CURRENT_HEADING_STRING;
   std::string cmd_response = command(cmd);
   if (cmd_response.substr(0, 5) != "ERROR" && cmd_response.size() >= 4) {
@@ -392,8 +424,11 @@ bool Eddie::getHeading(const std::shared_ptr<eddiebot_msgs::srv::GetHeading::Req
     return false;
 }
 
-bool Eddie::getSpeed(const std::shared_ptr<eddiebot_msgs::srv::GetSpeed::Request> &req,
-                     std::shared_ptr<eddiebot_msgs::srv::GetSpeed::Response> &res) {
+bool Eddie::getSpeed(
+    const std::shared_ptr<eddiebot_msgs::srv::GetSpeed::Request> req,
+    std::shared_ptr<eddiebot_msgs::srv::GetSpeed::Response> res) {
+  (void) res;
+  (void) req;
   std::string cmd = GET_CURRENT_SPEED_STRING;
   std::string cmd_response = command(cmd);
   if (cmd_response.substr(0, 5) != "ERROR" && cmd_response.size() >= 10) {
@@ -414,8 +449,11 @@ bool Eddie::getSpeed(const std::shared_ptr<eddiebot_msgs::srv::GetSpeed::Request
     return false;
 }
 
-bool Eddie::resetEncoder(const std::shared_ptr<eddiebot_msgs::srv::ResetEncoder::Request> &req,
-                         std::shared_ptr<eddiebot_msgs::srv::ResetEncoder::Response> &res) {
+bool Eddie::resetEncoder(
+    const std::shared_ptr<eddiebot_msgs::srv::ResetEncoder::Request> req,
+    std::shared_ptr<eddiebot_msgs::srv::ResetEncoder::Response> res) {
+  (void) res;
+  (void) req;
   std::string cmd = RESET_ENCODER_TICKS_STRING;
   std::string cmd_response = command(cmd);
   if (cmd_response == "\r")
@@ -424,8 +462,10 @@ bool Eddie::resetEncoder(const std::shared_ptr<eddiebot_msgs::srv::ResetEncoder:
     return false;
 }
 
-bool Eddie::rotate(const std::shared_ptr<eddiebot_msgs::srv::Rotate::Request> &req,
-                   std::shared_ptr<eddiebot_msgs::srv::Rotate::Response> &res) {
+bool Eddie::rotate(
+    const std::shared_ptr<eddiebot_msgs::srv::Rotate::Request> req,
+    std::shared_ptr<eddiebot_msgs::srv::Rotate::Response> res) {
+  (void) res;
   std::string cmd;
   cmd = generateCommand(SET_ROTATE_STRING, req->angle, req->speed);
   std::string cmd_response = command(cmd);
@@ -435,8 +475,10 @@ bool Eddie::rotate(const std::shared_ptr<eddiebot_msgs::srv::Rotate::Request> &r
     return false;
 }
 
-bool Eddie::stopAtDistance(const std::shared_ptr<eddiebot_msgs::srv::StopAtDistance::Request> &req,
-                           std::shared_ptr<eddiebot_msgs::srv::StopAtDistance::Response> &res) {
+bool Eddie::stopAtDistance(
+    const std::shared_ptr<eddiebot_msgs::srv::StopAtDistance::Request> req,
+    std::shared_ptr<eddiebot_msgs::srv::StopAtDistance::Response> res) {
+  (void) res;
   std::string cmd;
   cmd = generateCommand(SET_STOP_DISTANCE_STRING, req->distance);
   std::string cmd_response = command(cmd);
