@@ -299,12 +299,12 @@ void Eddie::publishEncodersData() {
     encoder_pub_->publish(encoders_data);
 }
 
-bool Eddie::accelerate(eddiebot_msgs::srv::Accelerate::Request &req,
-                       eddiebot_msgs::srv::Accelerate::Response &res) {
+bool Eddie::accelerate(const std::shared_ptr<eddiebot_msgs::srv::Accelerate::Request> &req,
+                       std::shared_ptr<eddiebot_msgs::srv::Accelerate::Response> &res) {
   // this feature does not need to validate the parameters due the limited range
   // of parameter data type
   std::string cmd;
-  cmd = generateCommand(SET_RAMPING_VALUE_STRING, req.rate);
+  cmd = generateCommand(SET_RAMPING_VALUE_STRING, req->rate);
   std::string cmd_response = command(cmd);
   if (cmd_response == "\r")
     return true;
@@ -313,12 +313,12 @@ bool Eddie::accelerate(eddiebot_msgs::srv::Accelerate::Request &req,
 }
 
 bool Eddie::driveWithDistance(
-    eddiebot_msgs::srv::DriveWithDistance::Request &req,
-    eddiebot_msgs::srv::DriveWithDistance::Response &res) {
+    const std::shared_ptr<eddiebot_msgs::srv::DriveWithDistance::Request> &req,
+    std::shared_ptr<eddiebot_msgs::srv::DriveWithDistance::Response> &res) {
   // this feature does not need to validate the parameters due the limited range
   // of parameter data type
   std::string cmd;
-  cmd = generateCommand(SET_DRIVE_DISTANCE_STRING, req.distance, req.speed);
+  cmd = generateCommand(SET_DRIVE_DISTANCE_STRING, req->distance, req->speed);
   std::string cmd_response = command(cmd);
   if (cmd_response == "\r")
     return true;
@@ -326,16 +326,16 @@ bool Eddie::driveWithDistance(
     return false;
 }
 
-bool Eddie::driveWithPower(eddiebot_msgs::srv::DriveWithPower::Request &req,
-                           eddiebot_msgs::srv::DriveWithPower::Response &res) {
-  if (req.left > MOTOR_POWER_MAX_FORWARD ||
-      req.right > MOTOR_POWER_MAX_FORWARD ||
-      req.left < MOTOR_POWER_MAX_REVERSE ||
-      req.right < MOTOR_POWER_MAX_REVERSE) {
+bool Eddie::driveWithPower(const std::shared_ptr<eddiebot_msgs::srv::DriveWithPower::Request> &req,
+                           std::shared_ptr<eddiebot_msgs::srv::DriveWithPower::Response> &res) {
+  if (req->left > MOTOR_POWER_MAX_FORWARD ||
+      req->right > MOTOR_POWER_MAX_FORWARD ||
+      req->left < MOTOR_POWER_MAX_REVERSE ||
+      req->right < MOTOR_POWER_MAX_REVERSE) {
     return false;
   }
   std::string cmd;
-  cmd = generateCommand(SET_DRIVE_POWER_STRING, req.left, req.right);
+  cmd = generateCommand(SET_DRIVE_POWER_STRING, req->left, req->right);
   std::string cmd_response = command(cmd);
   if (cmd_response == "\r")
     return true;
@@ -345,16 +345,16 @@ bool Eddie::driveWithPower(eddiebot_msgs::srv::DriveWithPower::Request &req,
   }
 }
 
-bool Eddie::driveWithSpeed(eddiebot_msgs::srv::DriveWithSpeed::Request &req,
-                           eddiebot_msgs::srv::DriveWithSpeed::Response &res) {
-  if (req.left > TRAVEL_SPEED_MAX_FORWARD ||
-      req.right > TRAVEL_SPEED_MAX_FORWARD ||
-      req.left < TRAVEL_SPEED_MAX_REVERSE ||
-      req.right < TRAVEL_SPEED_MAX_REVERSE) {
+bool Eddie::driveWithSpeed(const std::shared_ptr<eddiebot_msgs::srv::DriveWithSpeed::Request> &req,
+                           std::shared_ptr<eddiebot_msgs::srv::DriveWithSpeed::Response> &res) {
+  if (req->left > TRAVEL_SPEED_MAX_FORWARD ||
+      req->right > TRAVEL_SPEED_MAX_FORWARD ||
+      req->left < TRAVEL_SPEED_MAX_REVERSE ||
+      req->right < TRAVEL_SPEED_MAX_REVERSE) {
     return false;
   }
   std::string cmd;
-  cmd = generateCommand(SET_DRIVE_SPEED_STRING, req.left, req.right);
+  cmd = generateCommand(SET_DRIVE_SPEED_STRING, req->left, req->right);
   std::string cmd_response = command(cmd);
   if (cmd_response == "\r")
     return true;
@@ -362,38 +362,38 @@ bool Eddie::driveWithSpeed(eddiebot_msgs::srv::DriveWithSpeed::Request &req,
     return false;
 }
 
-bool Eddie::getDistance(eddiebot_msgs::srv::GetDistance::Request &req,
-                        eddiebot_msgs::srv::GetDistance::Response &res) {
+bool Eddie::getDistance(const std::shared_ptr<eddiebot_msgs::srv::GetDistance::Request> &req,
+                        std::shared_ptr<eddiebot_msgs::srv::GetDistance::Response> &res) {
   std::string cmd = GET_ENCODER_TICKS_STRING;
   std::string cmd_response = command(cmd);
   if (cmd_response.substr(0, 5) != "ERROR" && cmd_response.size() >= 18) {
     std::stringstream value;
     value << std::hex << cmd_response.substr(0, 8);
-    value >> res.left;
+    value >> res->left;
     value.str(std::string());
     value.clear();
     value << std::hex << cmd_response.substr(9, 8);
-    value >> res.right;
+    value >> res->right;
     return true;
   } else
     return false;
 }
 
-bool Eddie::getHeading(eddiebot_msgs::srv::GetHeading::Request &req,
-                       eddiebot_msgs::srv::GetHeading::Response &res) {
+bool Eddie::getHeading(const std::shared_ptr<eddiebot_msgs::srv::GetHeading::Request> &req,
+                       std::shared_ptr<eddiebot_msgs::srv::GetHeading::Response> &res) {
   std::string cmd = GET_CURRENT_HEADING_STRING;
   std::string cmd_response = command(cmd);
   if (cmd_response.substr(0, 5) != "ERROR" && cmd_response.size() >= 4) {
     std::stringstream value;
     value << std::hex << cmd_response.substr(0, 3);
-    value >> res.heading;
+    value >> res->heading;
     return true;
   } else
     return false;
 }
 
-bool Eddie::getSpeed(eddiebot_msgs::srv::GetSpeed::Request &req,
-                     eddiebot_msgs::srv::GetSpeed::Response &res) {
+bool Eddie::getSpeed(const std::shared_ptr<eddiebot_msgs::srv::GetSpeed::Request> &req,
+                     std::shared_ptr<eddiebot_msgs::srv::GetSpeed::Response> &res) {
   std::string cmd = GET_CURRENT_SPEED_STRING;
   std::string cmd_response = command(cmd);
   if (cmd_response.substr(0, 5) != "ERROR" && cmd_response.size() >= 10) {
@@ -401,21 +401,21 @@ bool Eddie::getSpeed(eddiebot_msgs::srv::GetSpeed::Request &req,
     std::stringstream value;
     value << std::hex << cmd_response.substr(0, 4);
     value >> tmp;
-    res.left = static_cast<uint16_t>(tmp);
+    res->left = static_cast<uint16_t>(tmp);
 
     value.str(std::string());
     value.clear();
     value << std::hex << cmd_response.substr(5, 4);
     value >> tmp;
-    res.right = static_cast<uint16_t>(tmp);
+    res->right = static_cast<uint16_t>(tmp);
 
     return true;
   } else
     return false;
 }
 
-bool Eddie::resetEncoder(eddiebot_msgs::srv::ResetEncoder::Request &req,
-                         eddiebot_msgs::srv::ResetEncoder::Response &res) {
+bool Eddie::resetEncoder(const std::shared_ptr<eddiebot_msgs::srv::ResetEncoder::Request> &req,
+                         std::shared_ptr<eddiebot_msgs::srv::ResetEncoder::Response> &res) {
   std::string cmd = RESET_ENCODER_TICKS_STRING;
   std::string cmd_response = command(cmd);
   if (cmd_response == "\r")
@@ -424,10 +424,10 @@ bool Eddie::resetEncoder(eddiebot_msgs::srv::ResetEncoder::Request &req,
     return false;
 }
 
-bool Eddie::rotate(eddiebot_msgs::srv::Rotate::Request &req,
-                   eddiebot_msgs::srv::Rotate::Response &res) {
+bool Eddie::rotate(const std::shared_ptr<eddiebot_msgs::srv::Rotate::Request> &req,
+                   std::shared_ptr<eddiebot_msgs::srv::Rotate::Response> &res) {
   std::string cmd;
-  cmd = generateCommand(SET_ROTATE_STRING, req.angle, req.speed);
+  cmd = generateCommand(SET_ROTATE_STRING, req->angle, req->speed);
   std::string cmd_response = command(cmd);
   if (cmd_response == "\r")
     return true;
@@ -435,10 +435,10 @@ bool Eddie::rotate(eddiebot_msgs::srv::Rotate::Request &req,
     return false;
 }
 
-bool Eddie::stopAtDistance(eddiebot_msgs::srv::StopAtDistance::Request &req,
-                           eddiebot_msgs::srv::StopAtDistance::Response &res) {
+bool Eddie::stopAtDistance(const std::shared_ptr<eddiebot_msgs::srv::StopAtDistance::Request> &req,
+                           std::shared_ptr<eddiebot_msgs::srv::StopAtDistance::Response> &res) {
   std::string cmd;
-  cmd = generateCommand(SET_STOP_DISTANCE_STRING, req.distance);
+  cmd = generateCommand(SET_STOP_DISTANCE_STRING, req->distance);
   std::string cmd_response = command(cmd);
   if (cmd_response == "\r")
     return true;
