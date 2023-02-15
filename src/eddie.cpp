@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2012, Haikal Pribadi <haikal.pribadi@gmail.com>
  * Copyright (c) 2018, Zeyu Zhang <zeyuz@outlook.com>
+ * Copyright (c) 2023, Arash Sal Moslehian <arashsm79@yahoo.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,27 +46,26 @@ typedef std::map<std::string, unsigned char[6]> CommandMap;
 #define MAX_N_TRIES 3
 
 Eddie::Eddie(std::shared_ptr<rclcpp::Node> node_handle)
-    : GPIO_COUNT(10),
-      ADC_PIN_COUNT(8), DIGITAL_PIN_COUNT(10), AUXILIARY_POWER_RELAY_COUNT(3),
-      PARALLAX_MAX_BUFFER(256), ENCODER_COUNT(2),
-      ADC_VOLTAGE_MULTIPLIER(1 / 819), BATTERY_VOLTAGE_DIVIDER(3.21),
-      MOTOR_POWER_STOP(0), MOTOR_POWER_MAX_FORWARD(127),
-      MOTOR_POWER_MAX_REVERSE(-127), TRAVEL_SPEED_MAX_FORWARD(32767),
-      TRAVEL_SPEED_MAX_REVERSE(-32767), TRAVEL_MAX_SPEED(65535),
-      RELAY_33V_PIN_NUMBER(17), RELAY_5V_PIN_NUMBER(17),
-      RELAY_12V_PIN_NUMBER(18), PACKET_TERMINATOR('\r'),
-      PARAMETER_DELIMITER(' '), ERROR("ERROR"), DEFAULT_WHEEL_RADIUS(0.0762),
-      DEFAULT_TICKS_PER_REVOLUTION(36), GET_VERSION_STRING("VER"),
-      SET_GPIO_DIRECTION_OUT_STRING("OUT"), SET_GPIO_DIRECTION_IN_STRING("IN"),
-      SET_GPIO_STATE_HIGH_STRING("HIGH"), SET_GPIO_STATE_LOW_STRING("LOW"),
-      GET_GPIO_STATE_STRING("READ"), GET_ADC_VALUE_STRING("ADC"),
-      GET_PING_VALUE_STRING("PING"), SET_DRIVE_POWER_STRING("GO"),
-      SET_DRIVE_SPEED_STRING("GOSPD"), SET_DRIVE_DISTANCE_STRING("TRVL"),
-      SET_STOP_DISTANCE_STRING("STOP"), SET_ROTATE_STRING("TURN"),
-      GET_CURRENT_SPEED_STRING("SPD"), GET_CURRENT_HEADING_STRING("HEAD"),
-      GET_ENCODER_TICKS_STRING("DIST"), RESET_ENCODER_TICKS_STRING("RST"),
-      SET_RAMPING_VALUE_STRING("ACC"), FLUSH_BUFFERS_STRING("\r\r\r"),
-      node_handle_(node_handle) {
+    : GPIO_COUNT(10), ADC_PIN_COUNT(8), DIGITAL_PIN_COUNT(10),
+      AUXILIARY_POWER_RELAY_COUNT(3), PARALLAX_MAX_BUFFER(256),
+      ENCODER_COUNT(2), ADC_VOLTAGE_MULTIPLIER(1 / 819),
+      BATTERY_VOLTAGE_DIVIDER(3.21), MOTOR_POWER_STOP(0),
+      MOTOR_POWER_MAX_FORWARD(127), MOTOR_POWER_MAX_REVERSE(-127),
+      TRAVEL_SPEED_MAX_FORWARD(32767), TRAVEL_SPEED_MAX_REVERSE(-32767),
+      TRAVEL_MAX_SPEED(65535), RELAY_33V_PIN_NUMBER(17),
+      RELAY_5V_PIN_NUMBER(17), RELAY_12V_PIN_NUMBER(18),
+      PACKET_TERMINATOR('\r'), PARAMETER_DELIMITER(' '), ERROR("ERROR"),
+      DEFAULT_WHEEL_RADIUS(0.0762), DEFAULT_TICKS_PER_REVOLUTION(36),
+      GET_VERSION_STRING("VER"), SET_GPIO_DIRECTION_OUT_STRING("OUT"),
+      SET_GPIO_DIRECTION_IN_STRING("IN"), SET_GPIO_STATE_HIGH_STRING("HIGH"),
+      SET_GPIO_STATE_LOW_STRING("LOW"), GET_GPIO_STATE_STRING("READ"),
+      GET_ADC_VALUE_STRING("ADC"), GET_PING_VALUE_STRING("PING"),
+      SET_DRIVE_POWER_STRING("GO"), SET_DRIVE_SPEED_STRING("GOSPD"),
+      SET_DRIVE_DISTANCE_STRING("TRVL"), SET_STOP_DISTANCE_STRING("STOP"),
+      SET_ROTATE_STRING("TURN"), GET_CURRENT_SPEED_STRING("SPD"),
+      GET_CURRENT_HEADING_STRING("HEAD"), GET_ENCODER_TICKS_STRING("DIST"),
+      RESET_ENCODER_TICKS_STRING("RST"), SET_RAMPING_VALUE_STRING("ACC"),
+      FLUSH_BUFFERS_STRING("\r\r\r"), node_handle_(node_handle) {
   sem_init(&mutex, 0, 1);
   ping_pub_ = node_handle_->create_publisher<eddiebot_msgs::msg::Ping>(
       "/eddie/ping_data", 1);
@@ -74,8 +74,9 @@ Eddie::Eddie(std::shared_ptr<rclcpp::Node> node_handle)
   encoder_pub_ = node_handle_->create_publisher<eddiebot_msgs::msg::Encoders>(
       "/eddie/encoders_data", 1);
 
-  accelerate_srv_ = node_handle_->create_service<eddiebot_msgs::srv::Accelerate>(
-      "acceleration_rate", &Eddie::accelerate);
+  accelerate_srv_ =
+      node_handle_->create_service<eddiebot_msgs::srv::Accelerate>(
+          "acceleration_rate", &Eddie::accelerate);
   drive_with_distance_srv_ =
       node_handle_->create_service<eddiebot_msgs::srv::DriveWithDistance>(
           "drive_with_distance", &Eddie::driveWithDistance);
@@ -92,7 +93,7 @@ Eddie::Eddie(std::shared_ptr<rclcpp::Node> node_handle)
       node_handle_->create_service<eddiebot_msgs::srv::GetHeading>(
           "get_heading", &Eddie::getHeading);
   get_speed_srv_ = node_handle_->create_service<eddiebot_msgs::srv::GetSpeed>(
-      "get_speed", &Eddie::GetSpeed);
+      "get_speed", &Eddie::getSpeed);
   reset_encoder_srv_ =
       node_handle_->create_service<eddiebot_msgs::srv::ResetEncoder>(
           "reset_encoder", &Eddie::resetEncoder);
@@ -105,7 +106,7 @@ Eddie::Eddie(std::shared_ptr<rclcpp::Node> node_handle)
   std::string port =
       node_handle_
           ->get_parameter_or("serial_port",
-                            rclcpp::Parameter("serial_port", "/dev/ttyUSB0"))
+                             rclcpp::Parameter("serial_port", "/dev/ttyUSB0"))
           .as_string();
   initialize(port);
 
@@ -139,7 +140,7 @@ void Eddie::initialize(std::string port) {
 
 std::string Eddie::command(std::string str) {
   sem_wait(&mutex);
-  ssize_t written;
+  ssize_t _written;
   std::stringstream result("");
   int count = 0;
   unsigned char c;
@@ -152,7 +153,7 @@ std::string Eddie::command(std::string str) {
   command[size - 1] = PACKET_TERMINATOR; // Having exces terminator is okay,
                                          // it's good to guarantee
 
-  written = write(tty_fd, command, size);
+  _written = write(tty_fd, command, size);
   while (read(tty_fd, &c, 1) <= 0) {
     usleep(1000);
     count++;
@@ -203,7 +204,7 @@ std::string Eddie::intToHexString(int num) {
 
 eddiebot_msgs::msg::Ping Eddie::getPingData() {
   std::string result = command(GET_PING_VALUE_STRING);
-  // std::string result = "133 3C9 564 0F9 29B 0F0 31A 566 1E0 A97\r";
+  // e.g. result = "133 3C9 564 0F9 29B 0F0 31A 566 1E0 A97\r";
   eddiebot_msgs::msg::Ping ping_data;
   if (result.size() <= 1) {
     ping_data.status = "EMPTY";
@@ -231,7 +232,7 @@ eddiebot_msgs::msg::Ping Eddie::getPingData() {
 
 eddiebot_msgs::msg::ADC Eddie::getADCData() {
   std::string result = command(GET_ADC_VALUE_STRING);
-  // std::string result = "9C7 11E E4E 5AB 20F 97B 767 058\r";
+  // e.g.  result = "9C7 11E E4E 5AB 20F 97B 767 058\r";
   eddiebot_msgs::msg::ADC adc_data;
   if (result.size() <= 1) {
     adc_data.status = "EMPTY";
@@ -391,7 +392,7 @@ bool Eddie::getHeading(eddiebot_msgs::srv::GetHeading::Request &req,
     return false;
 }
 
-bool Eddie::GetSpeed(eddiebot_msgs::srv::GetSpeed::Request &req,
+bool Eddie::getSpeed(eddiebot_msgs::srv::GetSpeed::Request &req,
                      eddiebot_msgs::srv::GetSpeed::Response &res) {
   std::string cmd = GET_CURRENT_SPEED_STRING;
   std::string cmd_response = command(cmd);
@@ -453,8 +454,8 @@ int main(int argc, char **argv) {
   rclcpp::Rate loop_rate(5);
 
   while (rclcpp::ok()) {
-    // eddie.publishPingData();
-    // eddie.publishADCData();
+    eddie.publishPingData();
+    eddie.publishADCData();
     eddie.publishEncodersData();
 
     rclcpp::spin_some(node_handle);

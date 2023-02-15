@@ -248,7 +248,7 @@ private:
             eddiebot_msgs::srv::GetDistance::Response &res);
     bool getHeading(eddiebot_msgs::srv::GetHeading::Request &req,
             eddiebot_msgs::srv::GetHeading::Response &res);
-    bool GetSpeed(eddiebot_msgs::srv::GetSpeed::Request &req,
+    bool getSpeed(eddiebot_msgs::srv::GetSpeed::Request &req,
             eddiebot_msgs::srv::GetSpeed::Response &res);
     bool resetEncoder(eddiebot_msgs::srv::ResetEncoder::Request &req,
             eddiebot_msgs::srv::ResetEncoder::Response &res);
