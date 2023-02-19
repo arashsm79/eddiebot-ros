@@ -121,11 +121,8 @@ Eddie::Eddie(std::shared_ptr<rclcpp::Node> node_handle)
           std::bind(&Eddie::stopAtDistance, this, std::placeholders::_1,
                     std::placeholders::_2));
 
-  std::string port =
-      node_handle_
-          ->get_parameter_or("serial_port",
-                             rclcpp::Parameter("serial_port", "/dev/ttyUSB0"))
-          .as_string();
+  std::string port;
+  node_handle_->get_parameter_or<std::string>("serial_port", port, "/dev/ttyUSB0");
   initialize(port);
 
   command(RESET_ENCODER_TICKS_STRING);
