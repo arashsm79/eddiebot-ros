@@ -35,6 +35,9 @@
  */
 
 #include "eddiebot_bringup/eddie_controller.h"
+#include <rclcpp/executors.hpp>
+
+using namespace std::chrono_literals;
 
 EddieController::EddieController(std::shared_ptr<rclcpp::Node>)
     : left_power_(60), right_power_(62), rotation_power_(40),
@@ -112,19 +115,20 @@ EddieController::EddieController(std::shared_ptr<rclcpp::Node>)
   eddie_acceleration_rate_ =
       node_handle_->create_client<eddiebot_msgs::srv::Accelerate>(
           "acceleration_rate");
-  eddie_turn_ = node_handle_->create_client<eddiebot_msgs::srv::Rotate>("rotate");
+  eddie_turn_ =
+      node_handle_->create_client<eddiebot_msgs::srv::Rotate>("rotate");
   eddie_stop_ = node_handle_->create_client<eddiebot_msgs::srv::StopAtDistance>(
       "stop_at_distance");
-  eddie_heading_ =
-      node_handle_->create_client<eddiebot_msgs::srv::GetHeading>("get_heading");
-  eddie_reset_ =
-      node_handle_->create_client<eddiebot_msgs::srv::ResetEncoder>("reset_encoder");
+  eddie_heading_ = node_handle_->create_client<eddiebot_msgs::srv::GetHeading>(
+      "get_heading");
+  eddie_reset_ = node_handle_->create_client<eddiebot_msgs::srv::ResetEncoder>(
+      "reset_encoder");
 
   setAccelerationRate(acceleration_speed_);
 }
 
 void EddieController::velocityCallback(
-    const eddiebot_msgs::msg::Velocity::ConstSharedPtr& message) {
+    const eddiebot_msgs::msg::Velocity::ConstSharedPtr &message) {
   float linear = message->linear;
   int16_t angular = message->angular;
 
@@ -141,7 +145,7 @@ void EddieController::velocityCallback(
 }
 
 void EddieController::distanceCallback(
-    const eddiebot_msgs::msg::Distances::ConstSharedPtr& message) {
+    const eddiebot_msgs::msg::Distances::ConstSharedPtr &message) {
   sem_wait(&mutex_ping_);
   bool okay = true;
   for (uint i = 0; i < message->value.size(); i++) {
@@ -155,7 +159,7 @@ void EddieController::distanceCallback(
 }
 
 void EddieController::irCallback(
-    const eddiebot_msgs::msg::Voltages::ConstSharedPtr& message) {
+    const eddiebot_msgs::msg::Voltages::ConstSharedPtr &message) {
   sem_wait(&mutex_ir_);
   bool okay = true;
   for (uint i = 0; i < message->value.size(); i++) {
@@ -168,9 +172,10 @@ void EddieController::irCallback(
   sem_post(&mutex_ir_);
 }
 
-bool EddieController::getStatus(eddiebot_msgs::srv::GetStatus::Request::SharedPtr& req,
-                                eddiebot_msgs::srv::GetStatus::Response::SharedPtr& res) {
-  (void) req;
+bool EddieController::getStatus(
+    eddiebot_msgs::srv::GetStatus::Request::SharedPtr &req,
+    eddiebot_msgs::srv::GetStatus::Response::SharedPtr &res) {
+  (void)req;
   sem_wait(&mutex_ping_);
   sem_wait(&mutex_ir_);
 
@@ -185,25 +190,60 @@ bool EddieController::getStatus(eddiebot_msgs::srv::GetStatus::Request::SharedPt
 }
 
 void EddieController::stop() {
-  eddiebot_msgs::srv::StopAtDistance dist;
-  dist.request.distance = 4;
+  auto dist_req =
+      std::make_shared<eddiebot_msgs::srv::StopAtDistance::Request>();
+  dist_req->distance = 4;
 
   sem_wait(&mutex_interrupt_);
   interrupt_ = true;
   sem_post(&mutex_interrupt_);
 
-  for (int i = 0; !eddie_stop_->call(dist) && i < 5; i++)
+  while (!eddie_stop_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(node_handle_->get_logger(),
+                   "Interrupted while waiting for the service. Exiting.");
+      return;
+    }
+    RCLCPP_INFO(node_handle_->get_logger(),
+                "Service not available, waiting again...");
+  }
+  auto result = eddie_stop_->async_send_request(dist_req);
+  if (rclcpp::spin_until_future_complete(node_handle_, result) ==
+      rclcpp::FutureReturnCode::SUCCESS) {
     RCLCPP_ERROR(node_handle_->get_logger(),
+                 "Sent Eddie stop request to service.");
+  } else {
+    RCLCPP_ERROR(
+        node_handle_->get_logger(),
         "ERROR: at trying to stop Eddie. Trying to auto send command again...");
+  }
 
   current_power_ = 0;
 }
 
 void EddieController::setAccelerationRate(int rate) {
-  eddiebot_msgs::srv::Accelerate acc;
-  acc.request.rate = acceleration_speed_;
-  if (!eddie_acceleration_rate_->call(acc))
-    RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: Failed to set acceleration rate to %d", rate);
+  auto acc_req = std::make_shared<eddiebot_msgs::srv::Accelerate::Request>();
+
+  acc_req->rate = rate;
+
+  while (!eddie_acceleration_rate_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(node_handle_->get_logger(),
+                   "Interrupted while waiting for the service. Exiting.");
+      return;
+    }
+    RCLCPP_INFO(node_handle_->get_logger(),
+                "Service not available, waiting again...");
+  }
+  auto result = eddie_acceleration_rate_->async_send_request(acc_req);
+  if (rclcpp::spin_until_future_complete(node_handle_, result) ==
+      rclcpp::FutureReturnCode::SUCCESS) {
+    RCLCPP_ERROR(node_handle_->get_logger(),
+                 "Sent Eddie acceleration rate request to service.");
+  } else {
+    RCLCPP_ERROR(node_handle_->get_logger(),
+                 "ERROR: Failed to set acceleration rate to %d", rate);
+  }
 }
 
 void EddieController::moveLinear(float linear) {
@@ -262,36 +302,54 @@ void EddieController::drive(int8_t left, int8_t right) {
   bool cancel = interrupt_;
   sem_post(&mutex_interrupt_);
 
-  eddiebot_msgs::srv::DriveWithPower power;
+  auto power_req =
+      std::make_shared<eddiebot_msgs::srv::DriveWithPower::Request>();
+
   rclcpp::Time now;
   bool shift = true;
   int8_t previous_power = 0;
 
   while (rclcpp::ok() && shift && !cancel) {
-    now = rclcpp::Time::now();
-    if ((now.toSec() - last_cmd_time_.toSec()) >= 0.1) {
+    now = node_handle_->get_clock()->now();
+    if ((now.seconds() - last_cmd_time_.seconds()) >= 0.1) {
       previous_power = current_power_;
       updatePower(left, right);
 
       if (abs(left) < abs(right)) {
-        power.request.left = current_power_;
-        power.request.right = (int8_t)(current_power_ * ((double)right / left));
+        power_req->left = current_power_;
+        power_req->right = (int8_t)(current_power_ * ((double)right / left));
       } else {
-        power.request.right = current_power_;
-        power.request.left = (int8_t)(current_power_ * ((double)left / right));
+        power_req->right = current_power_;
+        power_req->left = (int8_t)(current_power_ * ((double)left / right));
       }
 
-      if (eddie_drive_power_.call(power))
-        last_cmd_time_ = rclcpp::Time::now();
-      else
+      while (!eddie_drive_power_->wait_for_service(1s)) {
+        if (!rclcpp::ok()) {
+          RCLCPP_ERROR(node_handle_->get_logger(),
+                       "Interrupted while waiting for the service. Exiting.");
+          return;
+        }
+        RCLCPP_INFO(node_handle_->get_logger(),
+                    "Service not available, waiting again...");
+      }
+      auto result = eddie_drive_power_->async_send_request(power_req);
+      if (rclcpp::spin_until_future_complete(node_handle_, result) ==
+          rclcpp::FutureReturnCode::SUCCESS) {
+        RCLCPP_ERROR(node_handle_->get_logger(),
+                     "Sent Eddie drive power request to service.");
+        last_cmd_time_ = node_handle_->get_clock()->now();
+      } else {
+        RCLCPP_ERROR(node_handle_->get_logger(),
+                     "ERROR: at trying to drive Eddie.");
         current_power_ = previous_power;
+      }
 
       if (left != current_power_ && right != current_power_)
         shift = true;
       else
         shift = false;
     }
-    rclcpp::spinOnce();
+    rclcpp::spin_some(node_handle_);
     usleep(1000);
     sem_wait(&mutex_interrupt_);
     cancel = interrupt_;
@@ -323,7 +381,9 @@ void EddieController::rotate(int16_t angular) {
   for (int i = 0; !(headed = eddie_heading_.call(heading)) && i < 5; i++)
     usleep(100);
   if (!headed) {
-    RCLCPP_ERROR(node_handle_->get_logger(), "Unable to get current Heading value. Encoder will now be reseted.");
+    RCLCPP_ERROR(
+        node_handle_->get_logger(),
+        "Unable to get current Heading value. Encoder will now be reseted.");
     sem_post(&mutex_execute_);
     return;
   } else {
@@ -362,7 +422,9 @@ void EddieController::rotate(int16_t angular) {
         eddiebot_msgs::StopAtDistance dist;
         dist.request.distance = 2;
         for (int i = 0; !eddie_stop_.call(dist) && i < 5; i++)
-          RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: at trying to stop Eddie. Trying to auto send command again...");
+          RCLCPP_ERROR(node_handle_->get_logger(),
+                       "ERROR: at trying to stop Eddie. Trying to auto send "
+                       "command again...");
         current_power_ = 0;
       } else {
         previous_power = current_power_;
