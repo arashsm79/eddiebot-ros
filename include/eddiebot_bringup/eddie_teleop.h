@@ -2,6 +2,7 @@
  * Software License Agreement (BSD License)
  *
  * Copyright (c) 2012, Haikal Pribadi <haikal.pribadi@gmail.com>
+ * Copyright (c) 2023, Arash Sal Moslehian <arashsm79@yahoo.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,13 +36,14 @@
 #ifndef _EDDIE_TELEOP_H
 #define	_EDDIE_TELEOP_H
 
-#include <ros/ros.h>
 #include <signal.h>
 #include <termios.h>
 #include <stdio.h>
 #include <fcntl.h>
-#include <parallax_eddie_robot/Velocity.h>
-#include <parallax_eddie_robot/KeyStroke.h>
+
+#include "rclcpp/rclcpp.hpp"
+#include "eddiebot_msgs/msg/velocity.hpp"
+#include "eddiebot_msgs/msg/key_stroke.hpp"
 
 #define KEYCODE_U 0x41
 #define KEYCODE_D 0x42
@@ -55,13 +57,13 @@ struct termios cooked, raw;
 class EddieTeleop
 {
 public:
-  EddieTeleop();
+  EddieTeleop(std::shared_ptr<rclcpp::Node>);
   void keyLoop();
 
 private:
-  ros::NodeHandle node_handle_;
-  ros::Publisher velocity_pub_;
-  ros::Publisher keystroke_pub_;
+  std::shared_ptr<rclcpp::Node> node_handle_;
+  rclcpp::Publisher<eddiebot_msgs::msg::Velocity>::SharedPtr velocity_pub_;
+  rclcpp::Publisher<eddiebot_msgs::msg::KeyStroke>::SharedPtr keystroke_pub_;
   float linear_, angular_;
   double l_scale_, a_scale_;
 

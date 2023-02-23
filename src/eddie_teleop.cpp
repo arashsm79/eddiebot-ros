@@ -2,6 +2,7 @@
  * Software License Agreement (BSD License)
  *
  * Copyright (c) 2012, Haikal Pribadi <haikal.pribadi@gmail.com>
+ * Copyright (c) 2023, Arash Sal Moslehian <arashsm79@yahoo.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,16 +33,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "eddie_teleop.h"
+#include "eddiebot_bringup/eddie_teleop.h"
 
-EddieTeleop::EddieTeleop() :
-  linear_(0), angular_(0), l_scale_(2.0), a_scale_(2.0)
+EddieTeleop::EddieTeleop(std::shared_ptr<rclcpp::Node> node_handle) :
+  node_handle_(node_handle), linear_(0), angular_(0), l_scale_(2.0), a_scale_(2.0)
 {
-  velocity_pub_ = node_handle_.advertise<parallax_eddie_robot::Velocity > ("/eddie/command_velocity", 1);
-  keystroke_pub_ = node_handle_.advertise<parallax_eddie_robot::KeyStroke > ("/eddie/key_stroke", 1);
+  velocity_pub_ = node_handle_->create_publisher<eddiebot_msgs::msg::Velocity>(
+      "/eddie/command_velocity", 1);
+  keystroke_pub_ = node_handle_->create_publisher<eddiebot_msgs::msg::KeyStroke>(
+      "/eddie/key_stroke", 1);
 
-  node_handle_.param("angular_scale", a_scale_, a_scale_);
-  node_handle_.param("linear_scale", l_scale_, l_scale_);
+  node_handle_->get_parameter_or("angular_scale", a_scale_, a_scale_);
+  node_handle_->get_parameter_or("linear_scale", l_scale_, l_scale_);
 }
 
 void EddieTeleop::keyLoop()
@@ -63,9 +66,9 @@ void EddieTeleop::keyLoop()
   flags |= O_NONBLOCK;
   fcntl(0, F_SETFL, flags);
 
-  ROS_INFO("Reading from keyboard");
-  ROS_INFO("================================================");
-  ROS_INFO("Use arrow keys to navigate and space bar to stop");
+  RCLCPP_INFO(node_handle_->get_logger(), "Reading from keyboard");
+  RCLCPP_INFO(node_handle_->get_logger(), "================================================");
+  RCLCPP_INFO(node_handle_->get_logger(), "Use arrow keys to navigate and space bar to stop");
 
   while (true)
   {
@@ -80,34 +83,34 @@ void EddieTeleop::keyLoop()
     c = cb;
 
     linear_ = angular_ = 0;
-    //ROS_INFO("value: 0x%02X\n", c);
-    //ROS_INFO("KEY PRESSED: %s", &c);
+    //RCLCPP_INFO(node_handle_->get_logger(), "value: 0x%02X\n", c);
+    //RCLCPP_INFO(node_handle_->get_logger(), "KEY PRESSED: %s", &c);
     switch (c)
     {
       case KEYCODE_L:
-        ROS_DEBUG("LEFT");
+        RCLCPP_DEBUG(node_handle_->get_logger(), "LEFT");
         angular_ = -10;
         //linear_ = 1.0; //to test movement with linear and angular
         move = true;
         break;
       case KEYCODE_R:
-        ROS_DEBUG("RIGHT");
+        RCLCPP_DEBUG(node_handle_->get_logger(), "RIGHT");
         angular_ = 10;
         //linear_ = 1.0; //to test movement with linear and angular
         move = true;
         break;
       case KEYCODE_U:
-        ROS_DEBUG("UP");
+        RCLCPP_DEBUG(node_handle_->get_logger(), "UP");
         linear_ = 1.0;
         move = true;
         break;
       case KEYCODE_D:
-        ROS_DEBUG("DOWN");
+        RCLCPP_DEBUG(node_handle_->get_logger(), "DOWN");
         linear_ = -1.0;
         move = true;
         break;
       case ' ':
-        ROS_DEBUG("STOP");
+        RCLCPP_DEBUG(node_handle_->get_logger(), "STOP");
         linear_ = 0;
         move = true;
         break;
@@ -115,34 +118,34 @@ void EddieTeleop::keyLoop()
 
     if (move)
     {
-      parallax_eddie_robot::Velocity vel;
+      eddiebot_msgs::msg::Velocity vel;
       vel.angular = angular_ * a_scale_;
       vel.linear = linear_ * l_scale_;
-      velocity_pub_.publish(vel);
+      velocity_pub_->publish(vel);
       move = false;
     }
     if(c!=-1){
-      parallax_eddie_robot::KeyStroke key;
+      eddiebot_msgs::msg::KeyStroke key;
       key.keycode = c;
-      keystroke_pub_.publish(key);
+      keystroke_pub_->publish(key);
     }
   }
 }
 
 void quit(int sig)
 {
+  (void) sig;
   tcsetattr(kfd, TCSANOW, &cooked);
-  ros::shutdown();
+  rclcpp::shutdown();
   exit(0);
 }
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "eddie_teleop");
-  EddieTeleop eddie_teleop;
-
+  rclcpp::init(argc, argv);
+  auto node_handle = rclcpp::Node::make_shared("eddie_teleop");
+  EddieTeleop eddie_teleop(node_handle);
   signal(SIGINT, quit);
-
   eddie_teleop.keyLoop();
 
   return (EXIT_SUCCESS);
