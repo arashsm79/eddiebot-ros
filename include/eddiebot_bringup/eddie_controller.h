@@ -94,11 +94,11 @@ private:
     bool ping_distances_okay_, ir_distances_okay_;
     rclcpp::Time last_cmd_time_;
 
-    void velocityCallback(const eddiebot_msgs::msg::Velocity::ConstSharedPtr& message);
-    void distanceCallback(const eddiebot_msgs::msg::Distances::ConstSharedPtr& message);
-    void irCallback(const eddiebot_msgs::msg::Voltages::ConstSharedPtr& message);
-    bool getStatus(eddiebot_msgs::srv::GetStatus::Request::SharedPtr& req,
-            eddiebot_msgs::srv::GetStatus::Response::SharedPtr& res);
+    void velocityCallback(const eddiebot_msgs::msg::Velocity::ConstSharedPtr message);
+    void distanceCallback(const eddiebot_msgs::msg::Distances::ConstSharedPtr message);
+    void irCallback(const eddiebot_msgs::msg::Voltages::ConstSharedPtr message);
+    bool getStatus(eddiebot_msgs::srv::GetStatus::Request::SharedPtr req,
+            eddiebot_msgs::srv::GetStatus::Response::SharedPtr res);
     void stop();
     void setAccelerationRate(int rate);
     void moveLinear(float linear);

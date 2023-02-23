@@ -39,11 +39,11 @@
 
 using namespace std::chrono_literals;
 
-EddieController::EddieController(std::shared_ptr<rclcpp::Node>)
-    : left_power_(60), right_power_(62), rotation_power_(40),
-      acceleration_power_(30), deceleration_power_(100), min_power_(32),
-      left_speed_(36), right_speed_(36), rotation_speed_(36),
-      acceleration_speed_(36), linear_scale_(1.0), angular_scale_(1.0) {
+EddieController::EddieController(std::shared_ptr<rclcpp::Node> node_handle)
+    : node_handle_(node_handle), left_power_(60), right_power_(62),
+      rotation_power_(40), acceleration_power_(30), deceleration_power_(100),
+      min_power_(32), left_speed_(36), right_speed_(36),
+      rotation_speed_(36), acceleration_speed_(36), linear_scale_(1.0), angular_scale_(1.0) {
   node_handle_->get_parameter_or("left_power", left_power_, left_power_);
   node_handle_->get_parameter_or("right_power", right_power_, right_power_);
   node_handle_->get_parameter_or("rotation_power", rotation_power_,
@@ -63,6 +63,7 @@ EddieController::EddieController(std::shared_ptr<rclcpp::Node>)
   node_handle_->get_parameter_or("angular_scale", angular_scale_,
                                  angular_scale_);
   node_handle_->get_parameter_or("linear_scale", linear_scale_, linear_scale_);
+  RCLCPP_INFO(node_handle_->get_logger(), "Parameters received.");
 
   sem_init(&mutex_execute_, 0, 1);
   sem_init(&mutex_interrupt_, 0, 1);
@@ -84,6 +85,7 @@ EddieController::EddieController(std::shared_ptr<rclcpp::Node>)
 
   sem_post(&mutex_interrupt_);
   sem_post(&mutex_state_);
+  RCLCPP_INFO(node_handle_->get_logger(), "Semaphores initiated");
 
   velocity_sub_ =
       node_handle_->create_subscription<eddiebot_msgs::msg::Velocity>(
@@ -100,11 +102,13 @@ EddieController::EddieController(std::shared_ptr<rclcpp::Node>)
           "/eddie/ir_voltages", 1,
           std::bind(&EddieController::irCallback, this, std::placeholders::_1));
 
+  RCLCPP_INFO(node_handle_->get_logger(), "Subscriptions created.");
   eddie_status_srv_ =
       node_handle_->create_service<eddiebot_msgs::srv::GetStatus>(
           "emergency_status",
           std::bind(&EddieController::getStatus, this, std::placeholders::_1,
                     std::placeholders::_2));
+  RCLCPP_INFO(node_handle_->get_logger(), "Service created.");
 
   eddie_drive_power_ =
       node_handle_->create_client<eddiebot_msgs::srv::DriveWithPower>(
@@ -124,11 +128,12 @@ EddieController::EddieController(std::shared_ptr<rclcpp::Node>)
   eddie_reset_ = node_handle_->create_client<eddiebot_msgs::srv::ResetEncoder>(
       "reset_encoder");
 
+  RCLCPP_INFO(node_handle_->get_logger(), "Clients created.");
   setAccelerationRate(acceleration_speed_);
 }
 
 void EddieController::velocityCallback(
-    const eddiebot_msgs::msg::Velocity::ConstSharedPtr &message) {
+    const eddiebot_msgs::msg::Velocity::ConstSharedPtr message) {
   float linear = message->linear;
   int16_t angular = message->angular;
 
@@ -145,7 +150,7 @@ void EddieController::velocityCallback(
 }
 
 void EddieController::distanceCallback(
-    const eddiebot_msgs::msg::Distances::ConstSharedPtr &message) {
+    const eddiebot_msgs::msg::Distances::ConstSharedPtr message) {
   sem_wait(&mutex_ping_);
   bool okay = true;
   for (uint i = 0; i < message->value.size(); i++) {
@@ -159,7 +164,7 @@ void EddieController::distanceCallback(
 }
 
 void EddieController::irCallback(
-    const eddiebot_msgs::msg::Voltages::ConstSharedPtr &message) {
+    const eddiebot_msgs::msg::Voltages::ConstSharedPtr message) {
   sem_wait(&mutex_ir_);
   bool okay = true;
   for (uint i = 0; i < message->value.size(); i++) {
@@ -173,8 +178,8 @@ void EddieController::irCallback(
 }
 
 bool EddieController::getStatus(
-    eddiebot_msgs::srv::GetStatus::Request::SharedPtr &req,
-    eddiebot_msgs::srv::GetStatus::Response::SharedPtr &res) {
+    eddiebot_msgs::srv::GetStatus::Request::SharedPtr req,
+    eddiebot_msgs::srv::GetStatus::Response::SharedPtr res) {
   (void)req;
   sem_wait(&mutex_ping_);
   sem_wait(&mutex_ir_);
@@ -375,6 +380,7 @@ void EddieController::rotate(int16_t angular) {
   rclcpp::Time now;
 
   bool shift = true, headed = false;
+  (void) headed;
   int16_t init_angle = 0, target_angle;
   int8_t left, right, previous_power;
 
@@ -637,6 +643,7 @@ void EddieController::execute() {
 int main(int argc, char **argv) {
   rclcpp::init(argc, argv);
   auto node_handle = rclcpp::Node::make_shared("eddie_controller");
+  RCLCPP_INFO(node_handle->get_logger(), "eddie_controller created.");
   EddieController controller(node_handle);
   controller.execute();
 
