@@ -26,9 +26,25 @@ target_include_directories(eddie_controller PUBLIC
 target_compile_features(eddie_controller PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 ament_target_dependencies(eddie_controller rclcpp eddiebot_msgs)
 
+add_executable(eddie_adc src/eddie_adc.cpp)
+target_include_directories(eddie_adc PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_compile_features(eddie_adc PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+ament_target_dependencies(eddie_adc rclcpp eddiebot_msgs)
+
+add_executable(eddie_ping src/eddie_ping.cpp)
+target_include_directories(eddie_ping PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_compile_features(eddie_ping PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+ament_target_dependencies(eddie_ping rclcpp eddiebot_msgs)
+
 install(TARGETS
   eddie
   eddie_controller
+  eddie_adc
+  eddie_ping
   DESTINATION lib/${PROJECT_NAME}
 )
 

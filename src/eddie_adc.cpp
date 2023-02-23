@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2012, Haikal Pribadi <haikal.pribadi@gmail.com>
  * Copyright (c) 2018, Zeyu Zhang <zeyuz@outlook.com>
+ * Copyright (c) 2023, Arash Sal Moslehian <arashsm79@yahoo.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,41 +34,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "eddie_adc.h"
+#include "eddiebot_bringup/eddie_adc.h"
+#include <rclcpp/executors.hpp>
 
 //=============================================================================//
-// This class is provided as a template for future features on the ADC sensors //
-// The callback function may be modified to adapt to custom configurations of  //
-// ADC sensors. Current (default) settings are for a set of IR distance        //
-// sensors and a battery sensor at the very end                                //
+// This class is provided as a template for future features on the ADC sensors
+// // The callback function may be modified to adapt to custom configurations of
+// // ADC sensors. Current (default) settings are for a set of IR distance //
+// sensors and a battery sensor at the very end //
 //=============================================================================//
 
-EddieADC::EddieADC() :
-  ADC_VOLTAGE_DIVIDER(819),
-  BATTERY_VOLTAGE_MULTIPLIER(3.21)
-{
-  ir_pub_ = node_handle_.advertise<eddiebot_msgs::Voltages > ("/eddie/ir_voltages", 1);
-  battery_pub_ = node_handle_.advertise<eddiebot_msgs::BatteryLevel > ("/eddie/battery_level", 1);
-  adc_sub_ = node_handle_.subscribe("/eddie/adc_data", 1, &EddieADC::adcCallback, this);
+EddieADC::EddieADC(std::shared_ptr<rclcpp::Node> node_handle)
+    : node_handle_(node_handle), ADC_VOLTAGE_DIVIDER(819),
+      BATTERY_VOLTAGE_MULTIPLIER(3.21) {
+  ir_pub_ = node_handle_->create_publisher<eddiebot_msgs::msg::Voltages>(
+      "/eddie/ir_voltages", 1);
+  battery_pub_ =
+      node_handle_->create_publisher<eddiebot_msgs::msg::BatteryLevel>(
+          "/eddie/battery_level", 1);
+  adc_sub_ = node_handle_->create_subscription<eddiebot_msgs::msg::ADC>(
+      "/eddie/adc_data", 1,
+      std::bind(&EddieADC::adcCallback, this, std::placeholders::_1));
 }
 
-void EddieADC::adcCallback(const eddiebot_msgs::ADC::ConstPtr& message)
-{
-  eddiebot_msgs::Voltages voltages;
-  eddiebot_msgs::BatteryLevel level;
+void EddieADC::adcCallback(
+    const eddiebot_msgs::msg::ADC::ConstSharedPtr message) {
+  eddiebot_msgs::msg::Voltages voltages;
+  eddiebot_msgs::msg::BatteryLevel level;
   double v, l;
-  if (message->status.substr(0, 5) == "ERROR") // ERROR messages may be longer than 5 if in VERBOSE mode
+  if (message->status.substr(0, 5) ==
+      "ERROR") // ERROR messages may be longer than 5 if in VERBOSE mode
   {
-    ROS_ERROR("ERROR: Unable to read ADC data for IR");
+    RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: Unable to read ADC data for IR");
     return;
   }
 
   uint i;
-  for (i = 0; i < message->value.size() - 1; i++)
-  {
+  for (i = 0; i < message->value.size() - 1; i++) {
     v = message->value[i];
-    if (v > 10)
-    {
+    if (v > 10) {
       v = v / ADC_VOLTAGE_DIVIDER;
       voltages.value.push_back(v);
     }
@@ -75,16 +80,15 @@ void EddieADC::adcCallback(const eddiebot_msgs::ADC::ConstPtr& message)
   l = message->value[i];
   l = l / ADC_VOLTAGE_DIVIDER * BATTERY_VOLTAGE_MULTIPLIER;
   level.value = l;
-  ir_pub_.publish(voltages);
-  battery_pub_.publish(level);
+  ir_pub_->publish(voltages);
+  battery_pub_->publish(level);
 }
 
-int main(int argc, char** argv)
-{
-  ros::init(argc, argv, "parallax_adc");
-  EddieADC adc;
-  ros::spin();
+int main(int argc, char **argv) {
+  rclcpp::init(argc, argv);
+  auto node_handle = rclcpp::Node::make_shared("parallax_adc");
+  EddieADC adc(node_handle);
+  rclcpp::spin(node_handle);
 
   return 0;
 }
-
