@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2012, Haikal Pribadi <haikal.pribadi@gmail.com>
  * Copyright (c) 2018, Zeyu Zhang <zeyuz@outlook.com>
+ * Copyright (c) 2023, Arash Sal Moslehian <arashsm79@yahoo.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,9 +37,9 @@
 #ifndef _EDDIE_PING_H
 #define	_EDDIE_PING_H
 
-#include <ros/ros.h>
-#include <eddiebot_msgs/Ping.h>
-#include <eddiebot_msgs/Distances.h>
+#include "rclcpp/rclcpp.hpp"
+#include "eddiebot_msgs/msg/ping.hpp"
+#include "eddiebot_msgs/msg/distances.hpp"
 
 //==============================================================================//
 // This class is provided as a template for future features on the Ping sensors //
@@ -47,14 +48,14 @@
 class EddiePing
 {
 public:
-  EddiePing();
+  EddiePing(std::shared_ptr<rclcpp::Node>);
 
 private:
-  ros::NodeHandle node_handle_;
-  ros::Publisher ping_pub_;
-  ros::Subscriber ping_sub_;
+  std::shared_ptr<rclcpp::Node> node_handle_;
+  rclcpp::Publisher<eddiebot_msgs::msg::Distances>::SharedPtr ping_pub_;
+  rclcpp::Subscription<eddiebot_msgs::msg::Ping>::SharedPtr ping_sub_;
 
-  void pingCallback(const eddiebot_msgs::Ping::ConstPtr& message);
+  void pingCallback(const eddiebot_msgs::msg::Ping::ConstSharedPtr message);
 };
 
 #endif	/* _EDDIE_PING_H */

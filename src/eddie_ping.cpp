@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2012, Haikal Pribadi <haikal.pribadi@gmail.com>
  * Copyright (c) 2018, Zeyu Zhang <zeyuz@outlook.com>
+ * Copyright (c) 2023, Arash Sal Moslehian <arashsm79@yahoo.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,38 +34,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "eddie_ping.h"
+#include "eddiebot_bringup/eddie_ping.h"
 
-EddiePing::EddiePing()
-{
-  ping_pub_ = node_handle_.advertise<eddiebot_msgs::Distances > ("/eddie/ping_distances", 1);
-  ping_sub_ = node_handle_.subscribe("/eddie/ping_data", 1, &EddiePing::pingCallback, this);
+EddiePing::EddiePing(std::shared_ptr<rclcpp::Node> node_handle)
+    : node_handle_(node_handle) {
+  ping_pub_ = node_handle_->create_publisher<eddiebot_msgs::msg::Distances>(
+      "/eddie/ping_distances", 1);
+  ping_sub_ = node_handle_->create_subscription<eddiebot_msgs::msg::Ping>(
+      "/eddie/ping_data", 1,
+      std::bind(&EddiePing::pingCallback, this, std::placeholders::_1));
 }
 
-void EddiePing::pingCallback(const eddiebot_msgs::Ping::ConstPtr& message)
-{
-  eddiebot_msgs::Distances distances;
+void EddiePing::pingCallback(const eddiebot_msgs::msg::Ping::ConstSharedPtr message) {
+  eddiebot_msgs::msg::Distances distances;
   uint16_t d;
-  if (message->status.substr(0, 5) == "ERROR") // ERROR messages may be longer than 5 if in VERBOSE mode
+  if (message->status.substr(0, 5) ==
+      "ERROR") // ERROR messages may be longer than 5 if in VERBOSE mode
   {
-    ROS_ERROR("ERROR: Unable to read Ping data from ping sensors");
+    RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: Unable to read Ping data from ping sensors");
     return;
   }
-  for (uint i = 0; i < message->value.size(); i++)
-  {
-    //OTHER WAYS OF ENCODING THE DATA MAY BE DONE HERE.
-    //DEFAULT DATA REPRESENTS DISTANCE IN MILLIMETERS
+  for (uint i = 0; i < message->value.size(); i++) {
+    // OTHER WAYS OF ENCODING THE DATA MAY BE DONE HERE.
+    // DEFAULT DATA REPRESENTS DISTANCE IN MILLIMETERS
     d = message->value[i];
     distances.value.push_back(d);
   }
-  ping_pub_.publish(distances);
+  ping_pub_->publish(distances);
 }
 
-int main(int argc, char** argv)
-{
-  ros::init(argc, argv, "parallax_ping");
-  EddiePing ping;
-  ros::spin();
+int main(int argc, char **argv) {
+  rclcpp::init(argc, argv);
+  auto node_handle = rclcpp::Node::make_shared("parallax_ping");
+  EddiePing ping(node_handle);
+  rclcpp::spin(node_handle);
 
   return 0;
 }
