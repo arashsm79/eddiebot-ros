@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2012, Haikal Pribadi <haikal.pribadi@gmail.com>
  * Copyright (c) 2018, Zeyu Zhang <zeyuz@outlook.com>
+ * Copyright (c) 2023, Arash Sal Moslehian <arashsm79@yahoo.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,10 +37,10 @@
 #ifndef _EDDIE_ADC_H
 #define	_EDDIE_ADC_H
 
-#include <ros/ros.h>
-#include <eddiebot_msgs/ADC.h>
-#include <eddiebot_msgs/BatteryLevel.h>
-#include <eddiebot_msgs/Voltages.h>
+#include "rclcpp/rclcpp.hpp"
+#include "eddiebot_msgs/msg/adc.hpp"
+#include "eddiebot_msgs/msg/battery_level.hpp"
+#include "eddiebot_msgs/msg/voltages.hpp"
 
 //=============================================================================//
 // This class is provided as a template for future features on the ADC sensors //
@@ -51,17 +52,17 @@
 class EddieADC
 {
 public:
-  EddieADC();
+  EddieADC(std::shared_ptr<rclcpp::Node>);
 
 private:
-  ros::NodeHandle node_handle_;
-  ros::Publisher ir_pub_;
-  ros::Publisher battery_pub_;
-  ros::Subscriber adc_sub_;
+  std::shared_ptr<rclcpp::Node> node_handle_;
+  rclcpp::Publisher<eddiebot_msgs::msg::Voltages>::SharedPtr ir_pub_;
+  rclcpp::Publisher<eddiebot_msgs::msg::BatteryLevel>::SharedPtr battery_pub_;
+  rclcpp::Subscription<eddiebot_msgs::msg::ADC>::SharedPtr adc_sub_;
   const double ADC_VOLTAGE_DIVIDER;
   const double BATTERY_VOLTAGE_MULTIPLIER;
 
-  void adcCallback(const eddiebot_msgs::ADC::ConstPtr& message);
+  void adcCallback(const eddiebot_msgs::msg::ADC::ConstSharedPtr message);
 };
 
 #endif	/* _EDDIE_ADC_H */
