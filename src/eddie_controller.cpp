@@ -128,7 +128,6 @@ EddieController::EddieController(std::shared_ptr<rclcpp::Node> node_handle)
   eddie_reset_ = node_handle_->create_client<eddiebot_msgs::srv::ResetEncoder>(
       "reset_encoder");
 
-  RCLCPP_INFO(node_handle_->get_logger(), "Clients created.");
   setAccelerationRate(acceleration_speed_);
 }
 

@@ -71,6 +71,7 @@ Eddie::Eddie(std::shared_ptr<rclcpp::Node> node_handle)
       "/eddie/ping_data", 1);
   adc_pub_ = node_handle_->create_publisher<eddiebot_msgs::msg::ADC>(
       "/eddie/adc_data", 1);
+  // >
   encoder_pub_ = node_handle_->create_publisher<eddiebot_msgs::msg::Encoders>(
       "/eddie/encoders_data", 1);
 
@@ -493,8 +494,8 @@ int main(int argc, char **argv) {
   rclcpp::Rate loop_rate(5);
 
   while (rclcpp::ok()) {
-    // eddie.publishPingData();
-    // eddie.publishADCData();
+    eddie.publishPingData();
+    eddie.publishADCData();
     eddie.publishEncodersData();
 
     rclcpp::spin_some(node_handle);
