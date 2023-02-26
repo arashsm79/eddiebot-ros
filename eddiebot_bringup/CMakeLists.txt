@@ -40,19 +40,11 @@ target_include_directories(eddie_ping PUBLIC
 target_compile_features(eddie_ping PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 ament_target_dependencies(eddie_ping rclcpp eddiebot_msgs)
 
-add_executable(eddie_teleop src/eddie_teleop.cpp)
-target_include_directories(eddie_teleop PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-target_compile_features(eddie_teleop PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-ament_target_dependencies(eddie_teleop rclcpp eddiebot_msgs)
-
 install(TARGETS
   eddie
   eddie_controller
   eddie_adc
   eddie_ping
-  eddie_teleop
   DESTINATION lib/${PROJECT_NAME}
 )
 

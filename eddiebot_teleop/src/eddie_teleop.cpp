@@ -33,7 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "eddiebot_bringup/eddie_teleop.h"
+#include "eddiebot_teleop/eddie_teleop.h"
 
 EddieTeleop::EddieTeleop(std::shared_ptr<rclcpp::Node> node_handle) :
   node_handle_(node_handle), linear_(0), angular_(0), l_scale_(2.0), a_scale_(2.0)
