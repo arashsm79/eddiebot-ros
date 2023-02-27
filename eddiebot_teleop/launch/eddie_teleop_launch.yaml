@@ -1,0 +1,14 @@
+launch:
+  - node:
+      pkg: "eddiebot_teleop"
+      name: "eddie_teleop"
+      exec: "eddie_teleop"
+      output: "screen"
+      remap:
+        - from: "/eddie/command_velocity"
+          to: "yocs_cmd_vel_mux/input/teleop"
+      param:
+        - name: "angular_scale"
+          value: "0.14"
+        - name: "linear_scale"
+          value: "0.17"

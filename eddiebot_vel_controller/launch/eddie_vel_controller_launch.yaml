@@ -1,0 +1,15 @@
+launch:
+  - node:
+      pkg: "eddiebot_vel_controller"
+      name: "eddie_vel_controller"
+      exec: "eddie_vel_controller"
+      remap:
+        - from: "/eddie/raw_cmd_vel"
+          to: "/yocs_cmd_vel_mux/output/cmd_vel"
+        - from: "/eddie/cmd_vel"
+          to: "/eddie/command_velocity"
+      param:
+        - name: "angular_scale"
+          value: "0.14"
+        - name: "linear_scale"
+          value: "0.17"
