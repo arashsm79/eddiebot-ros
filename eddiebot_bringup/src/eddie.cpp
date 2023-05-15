@@ -152,6 +152,8 @@ void Eddie::initialize(std::string port) {
 
   tcsetattr(tty_fd, TCSANOW, &tio);
   usleep(100000);
+  RCLCPP_INFO(node_handle_->get_logger(),
+              "Initializing Parallax board serial port connection done.");
 }
 
 std::string Eddie::command(std::string str) {
