@@ -21,6 +21,9 @@
     <material name ="light_grey">
       <color rgba="0.6 0.6 0.6 1"/>
     </material>
+    <material name="Black">
+        <color rgba="0.1 0.1 0.1 1"/>
+    </material>
 
     <!-- base_footprint is a fictitious link(frame) that is on the ground right below base_link origin, navigation stack depends on this frame -->
     <link name="base_footprint">
@@ -239,7 +242,7 @@
         <geometry>
           <cylinder radius="0.0762" length = "0.03175"/>
         </geometry>
-        <material name ="black" />
+        <material name ="Black" />
       </visual>
 
       <collision>
@@ -272,7 +275,7 @@
         <geometry>
           <cylinder radius="0.0762" length = "0.03175"/>
         </geometry>
-        <material name ="black" />
+        <material name ="Black" />
       </visual>
 
       <collision>

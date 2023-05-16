@@ -28,6 +28,9 @@
   <material name="light_grey">
     <color rgba="0.6 0.6 0.6 1"/>
   </material>
+  <material name="Black">
+    <color rgba="0.1 0.1 0.1 1"/>
+  </material>
   <!-- base_footprint is a fictitious link(frame) that is on the ground right below base_link origin, navigation stack depends on this frame -->
   <link name="base_footprint">
     <inertial>
@@ -207,7 +210,7 @@
       <geometry>
         <cylinder length="0.03175" radius="0.0762"/>
       </geometry>
-      <material name="black"/>
+      <material name="Black"/>
     </visual>
     <collision>
       <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
@@ -235,7 +238,7 @@
       <geometry>
         <cylinder length="0.03175" radius="0.0762"/>
       </geometry>
-      <material name="black"/>
+      <material name="Black"/>
     </visual>
     <collision>
       <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
