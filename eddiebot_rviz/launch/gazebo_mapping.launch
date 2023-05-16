@@ -1,0 +1,7 @@
+<launch>
+  <!-- View mapping information and odometry -->
+
+  <!-- Launch rviz with our favorite config file -->
+  <node name="view_mapping" pkg="rviz" type="rviz" args="-d $(find eddiebot_rviz_launchers)/rviz/view_mapping_gazebo.rviz" />
+  
+</launch>
