@@ -75,10 +75,10 @@
       </collision>
     </link>
 
-    <eddiebot_standoff_5in parent="${parent}" number="0" x_loc="0.0776402" y_loc="0.1314196" z_loc="0.06825"/>
-    <eddiebot_standoff_5in parent="${parent}" number="1" x_loc="0.0776402" y_loc="-0.1314196" z_loc="0.06825"/>
-    <eddiebot_standoff_5in parent="${parent}" number="2" x_loc="-0.0776402" y_loc="-0.1314196" z_loc="0.06825"/>
-    <eddiebot_standoff_5in parent="${parent}" number="3" x_loc="-0.0776402" y_loc="0.1314196" z_loc="0.06825"/>
+    <xacro:eddiebot_standoff_5in parent="${parent}" number="0" x_loc="0.0776402" y_loc="0.1314196" z_loc="0.06825"/>
+    <xacro:eddiebot_standoff_5in parent="${parent}" number="1" x_loc="0.0776402" y_loc="-0.1314196" z_loc="0.06825"/>
+    <xacro:eddiebot_standoff_5in parent="${parent}" number="2" x_loc="-0.0776402" y_loc="-0.1314196" z_loc="0.06825"/>
+    <xacro:eddiebot_standoff_5in parent="${parent}" number="3" x_loc="-0.0776402" y_loc="0.1314196" z_loc="0.06825"/>
   </xacro:macro>
 
 </robot>

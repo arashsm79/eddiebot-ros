@@ -106,8 +106,8 @@
         </inertial>
     </link>
 
-    <eddiebot_standoff_30cm parent="${parent}" number="0" x_loc="-0.140" y_loc="-0.084" z_loc="0.15715"/>
-    <eddiebot_standoff_30cm parent="${parent}" number="1" x_loc="-0.140" y_loc="0.084" z_loc="0.15715"/>
+    <xacro:eddiebot_standoff_30cm parent="${parent}" number="0" x_loc="-0.140" y_loc="-0.084" z_loc="0.15715"/>
+    <xacro:eddiebot_standoff_30cm parent="${parent}" number="1" x_loc="-0.140" y_loc="0.084" z_loc="0.15715"/>
   </xacro:macro>
 
 </robot>

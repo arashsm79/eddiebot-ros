@@ -293,7 +293,7 @@
     </joint>
 
     <!-- This pretends to be in the center in order to aid in calculating degrees from multiple sensors on one fake laser scan -->
-    <!-- <joint name="ping_array_joint" type="fixed">
+    <joint name="ping_array_joint" type="fixed">
       <origin xyz="0 0 0.03695" rpy="0 0 0" />
       <parent link="base_link" />
       <child link="ping_sensor_array" />
@@ -312,9 +312,9 @@
           iyy="0.0001" iyz="0.0"
           izz="0.0001" />
       </inertial>
-    </link> -->
+    </link>
 
-    <!-- <joint name="ir_array_joint" type="fixed">
+    <joint name="ir_array_joint" type="fixed">
       <origin xyz="0 0 0.03695" rpy="0 0 0" />
       <parent link="base_link" />
       <child link="ir_sensor_array" />
@@ -333,7 +333,7 @@
           iyy="0.0001" iyz="0.0"
           izz="0.0001" />
       </inertial>
-    </link> -->
+    </link>
   </xacro:macro>
 
 </robot>
