@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <robot name="sensor_kinect" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find eddiebot_description)/urdf/sensors/rgbd_sensor.urdf.xacro"/>
-  <xacro:include filename="$(find eddiebot_description)/urdf/camera_properties.urdf.xacro"/>
   
   <xacro:property name="kinect_cam_py" value="-0.0125"/>
   <xacro:property name="kinect_cam_pz" value="0.055" />

@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 <robot name="sensor_asus_xtion_pro" xmlns:xacro="http://ros.org/wiki/xacro">
-  <!-- Primesense Carmine share a same model with asus xtion pro -->
-  <xacro:include filename="$(find eddiebot_description)/urdf/turtlebot_gazebo.urdf.xacro"/>
-  <xacro:include filename="$(find eddiebot_description)/urdf/camera_properties.urdf.xacro"/>
+  <xacro:include filename="$(find eddiebot_description)/urdf/sensors/rgbd_sensor.urdf.xacro"/>
   
   <!-- Xacro properties -->
   <xacro:property name="M_SCALE" value="0.001"/>
