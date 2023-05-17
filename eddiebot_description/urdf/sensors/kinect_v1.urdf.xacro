@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot name="sensor_kinect" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:include filename="$(find eddiebot_description)/urdf/turtlebot_gazebo.urdf.xacro"/>
+  <xacro:include filename="$(find eddiebot_description)/urdf/sensors/rgbd_sensor.urdf.xacro"/>
   <xacro:include filename="$(find eddiebot_description)/urdf/camera_properties.urdf.xacro"/>
   
   <xacro:property name="kinect_cam_py" value="-0.0125"/>
@@ -12,6 +12,7 @@
       <parent link="${parent}"/>
       <child link="camera_rgb_frame" />
     </joint>
+
     <link name="camera_rgb_frame"/>
 
     <joint name="camera_rgb_optical_joint" type="fixed">
@@ -19,6 +20,7 @@
       <parent link="camera_rgb_frame" />
       <child link="camera_rgb_optical_frame" />
     </joint>
+
     <link name="camera_rgb_optical_frame"/>
 
     <joint name="camera_joint" type="fixed">
@@ -67,6 +69,6 @@
 	<link name="camera_depth_optical_frame"/>
 	
 	<!-- Kinect sensor for simulation -->
-	<turtlebot_sim_3dsensor/>
+	<xacro:rgbd_sensor_sim/>
   </xacro:macro>
 </robot>
