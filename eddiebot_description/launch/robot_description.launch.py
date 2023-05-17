@@ -1,3 +1,6 @@
+# Inspired by https://github.com/turtlebot/turtlebot4/blob/humble/turtlebot4_description/launch/robot_description.launch.py
+# https://github.com/turtlebot/turtlebot4/commit/2201b469ff0ce6bcf0757a7cbf2ae6b9965a0211
+
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
