@@ -1,10 +1,8 @@
 <?xml version="1.0"?>
 <robot name="eddiebot_create_base" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:property name="M_PI" value="3.1415926535897931" />
-  <!-- Macro for creating eddiebot base. -->
 
-  <!-- <xacro:property name="base_x" value="0.33" /> -->
-  <!-- <xacro:property name="base_y" value="0.33" /> -->
+  <xacro:property name="M_PI" value="3.1415926535897931" />
+
   <xacro:macro name="box_inertial_matrix" params="m l w h">
       <inertia ixx="${(m*(w*w+h*h))/12.0}" ixy = "0.0" ixz = "0.0"
           iyy="${(m*(l*l+h*h))/12.0}" iyz = "0.0"
@@ -12,16 +10,14 @@
   </xacro:macro>
 
   <xacro:macro name="create_base">
-    <material name="Green">
-      <color rgba="0.0 0.8 0.0 1.0"/>
-    </material>
-    <material name ="veryDarkGrey">
+
+    <material name ="dark_gray">
       <color rgba=".2 .2 .2 1"/>
     </material>
     <material name ="light_grey">
       <color rgba="0.6 0.6 0.6 1"/>
     </material>
-    <material name="Black">
+    <material name="black">
         <color rgba="0.1 0.1 0.1 1"/>
     </material>
 
@@ -41,15 +37,13 @@
         <inertia ixx="0.01" ixy="0.0" ixz="0.0"
           iyy="0.01" iyz="0.0" izz="0.5" />
       </inertial>
-
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
           <cylinder length="0.0095" radius="0.2245"/>
         </geometry>
-        <material name ="veryDarkGrey" />
+        <material name ="dark_gray" />
       </visual>
-
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
@@ -57,6 +51,12 @@
         </geometry>
       </collision>
     </link>
+
+    <joint name="base_footprint_joint" type="fixed">
+      <origin xyz="0 0 0.10125" rpy="0 0 0" />        
+      <parent link="base_footprint"/>
+      <child link="base_link" />
+    </joint>
 
     <link name="battery_box">
       <inertial>
@@ -66,15 +66,13 @@
           iyy="0.0001" iyz="0.0"
           izz="0.0001" />
       </inertial>
-
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
           <box size="0.1778 0.3366 0.0762" />
         </geometry>
-        <material name ="veryDarkGrey" />
+        <material name ="dark_gray" />
       </visual>
-
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
@@ -97,7 +95,6 @@
           iyy="0.0001" iyz="0.0"
           izz="0.0001" />
       </inertial>
-
       <visual>
         <!-- <geometry>
           <cylinder length="0.061" radius="0.05"/>
@@ -111,14 +108,12 @@
           <color rgba="0.6 0.6 0.6 1"/>
         </material>
       </visual>
-
       <collision>
         <geometry>
           <cylinder length="0.061" radius="0.05"/>
         </geometry>
         <origin rpy="${M_PI/2} 0 0" xyz="0 0 -0.05"/>
       </collision>
-
     </link>
 
     <joint name="front_caster_joint" type="fixed">
@@ -135,7 +130,6 @@
           iyy="0.0001" iyz="0.0"
           izz="0.0001" />
       </inertial>
-
       <visual>
         <origin xyz="0 0 0" rpy="-1.5707 0 1.5707" />
         <geometry>
@@ -145,26 +139,18 @@
           <color rgba="0.6 0.6 0.6 1"/>
         </material>
       </visual>
-
       <collision>
         <geometry>
           <cylinder length="0.061" radius="0.05"/>
         </geometry>
         <origin rpy="${M_PI/2} 0 0" xyz="0 0 -0.05"/>
       </collision>
-
     </link>
 
     <joint name="rear_caster_joint" type="fixed">
       <origin xyz="-0.18745 0 -0.00475" rpy="0 0 0" />
       <parent link="base_link" />
       <child link="rear_caster" />
-    </joint>
-
-    <joint name="base_footprint_joint" type="fixed">
-      <origin xyz="0 0 0.10125" rpy="0 0 0" />        
-      <parent link="base_footprint"/>
-      <child link="base_link" />
     </joint>
 
     <link name="left_axle_link">
@@ -174,7 +160,6 @@
         <inertia ixx="0.001" ixy="0.0" ixz="0.0"
           iyy="0.001" iyz="0.0" izz="0.001" />
       </inertial>
-
       <visual>
         <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
         <geometry>
@@ -182,7 +167,6 @@
         </geometry>
         <material name ="light_grey" />
       </visual>
-
       <collision>
         <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
         <geometry>
@@ -205,7 +189,6 @@
         <inertia ixx="0.001" ixy="0.0" ixz="0.0"
           iyy="0.001" iyz="0.0" izz="0.001" />
       </inertial>
-
       <visual>
         <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
         <geometry>
@@ -213,7 +196,6 @@
         </geometry>
         <material name ="light_grey" />
       </visual>
-
       <collision>
         <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
         <geometry>
@@ -236,15 +218,13 @@
         <inertia ixx="0.001" ixy="0.0" ixz="0.0"
           iyy="0.001" iyz="0.0" izz="0.001" />
       </inertial>
-
       <visual>
         <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
         <geometry>
           <cylinder radius="0.0762" length = "0.03175"/>
         </geometry>
-        <material name ="Black" />
+        <material name ="black" />
       </visual>
-
       <collision>
         <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
         <geometry>
@@ -269,15 +249,13 @@
         <inertia ixx="0.001" ixy="0.0" ixz="0.0"
           iyy="0.001" iyz="0.0" izz="0.001" />
       </inertial>
-
       <visual>
         <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
         <geometry>
           <cylinder radius="0.0762" length = "0.03175"/>
         </geometry>
-        <material name ="Black" />
+        <material name ="black" />
       </visual>
-
       <collision>
         <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
         <geometry>
@@ -295,6 +273,21 @@
       <axis xyz="0 1 0"/>
     </joint>
 
+    <link name="ping_sensor_array">
+      <visual>
+        <geometry>
+          <box size="0.0174 0.06 0.0644" />
+        </geometry>
+      </visual>
+      <inertial>
+        <mass value="0.001" />
+        <origin xyz="0 0 0" />
+        <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+          iyy="0.0001" iyz="0.0"
+          izz="0.0001" />
+      </inertial>
+    </link>
+
     <!-- This pretends to be in the center in order to aid in calculating degrees from multiple sensors on one fake laser scan -->
     <joint name="ping_array_joint" type="fixed">
       <origin xyz="0 0 0.03695" rpy="0 0 0" />
@@ -302,7 +295,7 @@
       <child link="ping_sensor_array" />
     </joint>
 
-    <link name="ping_sensor_array">
+    <link name="ir_sensor_array">
       <visual>
         <geometry>
           <box size="0.0174 0.06 0.0644" />
@@ -322,21 +315,6 @@
       <parent link="base_link" />
       <child link="ir_sensor_array" />
     </joint>
-
-    <link name="ir_sensor_array">
-      <visual>
-        <geometry>
-          <box size="0.0174 0.06 0.0644" />
-        </geometry>
-      </visual>
-      <inertial>
-        <mass value="0.001" />
-        <origin xyz="0 0 0" />
-        <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
-          iyy="0.0001" iyz="0.0"
-          izz="0.0001" />
-      </inertial>
-    </link>
   </xacro:macro>
 
 </robot>

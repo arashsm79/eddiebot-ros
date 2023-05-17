@@ -91,10 +91,6 @@
       <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
     </inertial>
     <visual>
-      <!-- <geometry>
-          <cylinder length="0.061" radius="0.05"/>
-        </geometry>
-        <origin rpy="${M_PI/2} 0 0" xyz="0 0 -0.05"/> -->
       <origin rpy="-1.5707 0 1.5707" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://eddiebot_description/meshes/28971-Caster-Wheel-Kit-v1.0.stl"/>
