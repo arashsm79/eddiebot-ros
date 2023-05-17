@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <model name="sound_wave">
+    <pose>0 0 0  0 0 0</pose>
+    <static>true</static>
+    <link name="body">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <scale>0.3 0.3 0.01</scale>
+            <uri>model://sound_wave/sound_wave.stl</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <lighting>true</lighting>
+          <ambient>1 0 0 1</ambient>
+          <diffuse>0 1 0 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+          <emissive>0 0 0 0</emissive>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

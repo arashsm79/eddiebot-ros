@@ -278,6 +278,7 @@
         <geometry>
           <box size="0.0174 0.06 0.0644" />
         </geometry>
+        <material name ="light_grey" />
       </visual>
       <inertial>
         <mass value="0.001" />
@@ -300,6 +301,7 @@
         <geometry>
           <box size="0.0174 0.06 0.0644" />
         </geometry>
+        <material name ="black" />
       </visual>
       <inertial>
         <mass value="0.001" />
