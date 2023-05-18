@@ -8,7 +8,9 @@
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_ros/transform_broadcaster.h"
 #include "nav_msgs/msg/odometry.hpp"
-
+#include <rclcpp/executors.hpp>
+#include <rclcpp/utilities.hpp>
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 class EddieBotVirtualDriver
 {

@@ -1,24 +1,32 @@
-#include "eddiebot_virtual_driver.h"
+#include "eddiebot_virtual_driver/eddiebot_virtual_driver.h"
+
 
 #define PI 				3.14159265359
 #define TWOPI			((PI) * 2)
 #define LINEAR_STEP		0.05
 #define ANGULAR_STEP	(10 / (PI))
 
-EddieBotVirtualDriver::EddieBotVirtualDriver()
+geometry_msgs::msg::Quaternion createQuaternionMsgFromYaw(double yaw)
+{
+  tf2::Quaternion q;
+  q.setRPY(0, 0, yaw);
+  return tf2::toMsg(q);
+}
+
+EddieBotVirtualDriver::EddieBotVirtualDriver(std::shared_ptr<rclcpp::Node> node_handle) : nh_(node_handle)
 {
 	x_ = y_ = th_ = 0;
 	vx_ = vy_ = vth_ = 0;
-	last_time_ = ros::Time::now();
+	last_time_ = nh_->get_clock()->now();
 	
 	sem_init(&mutex_data_, 0, 1);
 
-	odom_pub_ = nh_.advertise<nav_msgs::Odometry>("odom", 50);
-	cmd_vel_sub_ = nh_.subscribe("cmd_vel", 5, 
-		&EddieBotVirtualDriver::cmd_vel_cb_, this);
+	odom_pub_ = nh_->create_publisher<nav_msgs::msg::Odometry>("odom", 50);
+	cmd_vel_sub_ = nh_->create_subscription<eddiebot_msgs::msg::Velocity>("cmd_vel", 5,
+      std::bind(&EddieBotVirtualDriver::cmd_vel_cb_, this, std::placeholders::_1));
 }
 
-void EddieBotVirtualDriver::cmd_vel_cb_(const eddiebot_msgs::Velocity::ConstPtr &msg)
+void EddieBotVirtualDriver::cmd_vel_cb_(const eddiebot_msgs::msg::Velocity::ConstSharedPtr msg)
 {
 	
 	double linear, angular;
@@ -55,12 +63,12 @@ void EddieBotVirtualDriver::publish_odom()
 {
 	double x, y, th;
 	double vx, vy, vth;
-	ros::Time current_time;
+	rclcpp::Time current_time;
 
-	ros::Rate r(1.0);
+	rclcpp::Rate r(1.0);
 
-	while(nh_.ok()){
-		ros::spinOnce();
+	while(rclcpp::ok()){
+		rclcpp::spin_some(nh_);
 
 		sem_wait(&mutex_data_);
 
@@ -76,12 +84,12 @@ void EddieBotVirtualDriver::publish_odom()
 
 		sem_post(&mutex_data_);
 
-		current_time = ros::Time::now();
+		current_time = nh_->get_clock()->now();
 
 		//since all odometry is 6DOF we'll need a quaternion created from yaw
-	    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);
+	    geometry_msgs::msg::Quaternion odom_quat = createQuaternionMsgFromYaw(th);
 	    //first, we'll publish the transform over tf
-	    geometry_msgs::TransformStamped odom_trans;
+	    geometry_msgs::msg::TransformStamped odom_trans;
 	    odom_trans.header.stamp = current_time;
 	    odom_trans.header.frame_id = "odom";
 	    odom_trans.child_frame_id = "base_footprint";
@@ -90,10 +98,10 @@ void EddieBotVirtualDriver::publish_odom()
 	    odom_trans.transform.translation.z = 0.0;
 	    odom_trans.transform.rotation = odom_quat;
 	    //send the transform
-	    odom_broadcaster_.sendTransform(odom_trans);
+	    odom_broadcaster_->sendTransform(odom_trans);
 
 	    //next, we'll publish the odometry message over ROS
-	    nav_msgs::Odometry odom;
+	    nav_msgs::msg::Odometry odom;
 	    odom.header.stamp = current_time;
 	    odom.header.frame_id = "odom";
 	    //set the position
@@ -108,7 +116,7 @@ void EddieBotVirtualDriver::publish_odom()
 	    odom.twist.twist.angular.z = vth; 
 	    
 	    //publish the message
-	    odom_pub_.publish(odom);
+	    odom_pub_->publish(odom);
 
 	    sem_wait(&mutex_data_);
 	    last_time_ = current_time;
@@ -120,8 +128,10 @@ void EddieBotVirtualDriver::publish_odom()
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "eddiebot_virtual_driver");
-	EddieBotVirtualDriver eddiebot;
+  rclcpp::init(argc, argv);
+
+  auto node_handle = rclcpp::Node::make_shared("eddiebot_virtual_driver");
+	EddieBotVirtualDriver eddiebot(node_handle);
 
 	eddiebot.publish_odom();
 
