@@ -1,0 +1,6 @@
+<launch>
+
+  <!-- Publish eddiebot Odometry information -->
+  <node pkg="eddiebot_odom" type="eddie_odom" name="eddie_odom" />
+
+</launch>
