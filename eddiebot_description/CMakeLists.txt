@@ -13,7 +13,7 @@ find_package(urdf REQUIRED)
 find_package(xacro REQUIRED)
 
 install(
-  DIRECTORY launch worlds meshes urdf robots
+  DIRECTORY launch meshes urdf robots
   DESTINATION share/${PROJECT_NAME}
 )
 
