@@ -49,13 +49,6 @@
                 </visual>
             </link>
         </model>
-        <!-- Spawn Turtlebot4 -->
-        <include>
-            <pose>0 0 0 0 0 0</pose>
-            <uri>
-                model://turtlebot4
-            </uri>
-        </include>
 
         <model name='box1'>
             <pose>2 2 0.5 0 -0 0</pose>

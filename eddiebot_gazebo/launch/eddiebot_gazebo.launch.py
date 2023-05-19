@@ -27,12 +27,10 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 ARGUMENTS = [
     DeclareLaunchArgument('namespace', default_value='',
                           description='Robot namespace'),
-    DeclareLaunchArgument('rviz', default_value='false',
-                          choices=['true', 'false'], description='Start rviz.'),
     DeclareLaunchArgument('world', default_value='warehouse',
                           description='Eddie World'),
     DeclareLaunchArgument('model', default_value='eddie_kinect_v1',
-                          choices=['eddie_kinect_v1', 'eddie_kinect_v2'],
+                          choices=['eddie_kinect_v1'],
                           description='Eddiebot Model'),
 ]
 
