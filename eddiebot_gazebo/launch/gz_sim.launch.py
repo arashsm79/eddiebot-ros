@@ -38,7 +38,7 @@ ARGUMENTS = [
 def generate_launch_description():
 
     # Directories
-    pkg_ros_ign_gazebo = get_package_share_directory(
+    pkg_ros_gz_sim = get_package_share_directory(
         'ros_gz_sim')
     pkg_eddiebot_gazebo = get_package_share_directory(
         'eddiebot_gazebo')
@@ -56,7 +56,7 @@ def generate_launch_description():
 
     # Paths
     gz_sim_launch = PathJoinSubstitution(
-        [pkg_ros_ign_gazebo, 'launch', 'gz_sim.launch.py'])
+        [pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py'])
 
     gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([gz_sim_launch]),

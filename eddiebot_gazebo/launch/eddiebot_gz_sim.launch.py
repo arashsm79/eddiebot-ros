@@ -27,7 +27,7 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 ARGUMENTS = [
     DeclareLaunchArgument('namespace', default_value='',
                           description='Robot namespace'),
-    DeclareLaunchArgument('world', default_value='warehouse',
+    DeclareLaunchArgument('world', default_value='empty',
                           description='Eddie World'),
     DeclareLaunchArgument('model', default_value='eddie_kinect_v1',
                           choices=['eddie_kinect_v1'],
@@ -41,17 +41,17 @@ for pose_element in ['x', 'y', 'z', 'yaw']:
 
 def generate_launch_description():
     # Directories
-    pkg_turtlebot4_ignition_bringup = get_package_share_directory(
-        'turtlebot4_ignition_bringup')
+    pkg_eddiebot_gazebo = get_package_share_directory(
+        'eddiebot_gazebo')
 
     # Paths
-    ignition_launch = PathJoinSubstitution(
-        [pkg_turtlebot4_ignition_bringup, 'launch', 'ignition.launch.py'])
+    gz_sim_launch = PathJoinSubstitution(
+        [pkg_eddiebot_gazebo, 'launch', 'gz_sim.launch.py'])
     robot_spawn_launch = PathJoinSubstitution(
-        [pkg_turtlebot4_ignition_bringup, 'launch', 'turtlebot4_spawn.launch.py'])
+        [pkg_eddiebot_gazebo, 'launch', 'eddiebot_spawn.launch.py'])
 
-    ignition = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([ignition_launch]),
+    gz_sim = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([gz_sim_launch]),
         launch_arguments=[
             ('world', LaunchConfiguration('world'))
         ]
@@ -61,7 +61,6 @@ def generate_launch_description():
         PythonLaunchDescriptionSource([robot_spawn_launch]),
         launch_arguments=[
             ('namespace', LaunchConfiguration('namespace')),
-            ('rviz', LaunchConfiguration('rviz')),
             ('x', LaunchConfiguration('x')),
             ('y', LaunchConfiguration('y')),
             ('z', LaunchConfiguration('z')),
@@ -70,6 +69,6 @@ def generate_launch_description():
 
     # Create launch description and add actions
     ld = LaunchDescription(ARGUMENTS)
-    ld.add_action(ignition)
+    ld.add_action(gz_sim)
     ld.add_action(robot_spawn)
     return ld
