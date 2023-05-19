@@ -245,20 +245,11 @@
   </link>
   <!-- Fixed because we never rotate it anyway, it is just for show -->
   <!-- NOTE This may prevent gazebo from working with this model -->
-  <joint name="right_wheel_joint" type="revolute">
+  <joint name="right_wheel_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 -0.01905 0"/>
     <parent link="right_axle_link"/>
     <child link="right_wheel_link"/>
-    <pose relative_to="right_wheel_link"/>
-    <axis>
-      <xyz expressed_in="__model__">0 1 0</xyz>
-      <limit>
-        <lower>-1.79769e+308</lower>
-        <!--negative infinity-->
-        <upper>1.79769e+308</upper>
-        <!--positive infinity-->
-      </limit>
-    </axis>
+    <axis xyz="0 1 0"/>
   </joint>
   <link name="ping_sensor_array">
     <visual>
@@ -647,5 +638,10 @@
       <topic>kinect_rgbd_camera</topic>
       <enable_metrics>true</enable_metrics>
     </sensor>
+  </gazebo>
+  <!-- Listening on /model/$name/cmd_vel for velocity commands to move the robot -->
+  <gazebo>
+    <plugin filename="gz-sim-velocity-control-system" name="gz::sim::systems::VelocityControl">
+    </plugin>
   </gazebo>
 </robot>
