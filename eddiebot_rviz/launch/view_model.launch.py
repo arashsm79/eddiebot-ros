@@ -23,7 +23,7 @@ ARGUMENTS = [
             description='Launch eddiebot description'
             ),
         DeclareLaunchArgument('model', default_value='eddie_kinect_v1',
-                              choices=['eddie_kinect_v1', 'eddie_kinect_v2'],
+                              choices=['eddie_kinect_v1'],
                               description='Eddiebot Model'),
         DeclareLaunchArgument(
             'namespace',
@@ -63,7 +63,7 @@ def generate_launch_description():
         # Delay launch of robot description to allow Rviz2 to load first.
         # Prevents visual bugs in the model.
         TimerAction(
-            period=1.0,
+            period=3.0,
             actions=[
                 IncludeLaunchDescription(
                     PythonLaunchDescriptionSource([description_launch]),

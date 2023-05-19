@@ -11,7 +11,6 @@
 
   <depend>urdf</depend>
   <depend>xacro</depend>
-  <depend>irobot_create_description</depend>
   <depend>robot_state_publisher</depend>
 
   <exec_depend>ros2launch</exec_depend>

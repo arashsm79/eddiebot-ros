@@ -11,7 +11,6 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 find_package(urdf REQUIRED)
 find_package(xacro REQUIRED)
-find_package(irobot_create_description REQUIRED)
 
 install(
   DIRECTORY launch worlds meshes urdf robots

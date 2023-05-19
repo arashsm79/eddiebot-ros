@@ -12,7 +12,6 @@
   <depend>urdf</depend>
   <depend>xacro</depend>
   <depend>rviz2</depend>
-  <depend>irobot_create_description</depend>
   <depend>robot_state_publisher</depend>
   <depend>eddiebot_description</depend>
 
