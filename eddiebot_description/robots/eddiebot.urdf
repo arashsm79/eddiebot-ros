@@ -4,12 +4,17 @@
 <!-- |    EDITING THIS FILE BY HAND IS NOT RECOMMENDED                                 | -->
 <!-- =================================================================================== -->
 <robot name="eddiebot">
-  <!-- Macro for creating eddiebot circle stack. -->
-  <!-- <xacro:property name="base_x" value="0.33" /> -->
-  <!-- <xacro:property name="base_y" value="0.33" /> -->
+  <!-- Material colors -->
+  <material name="material_black">
+    <color rgba="0.1 0.1 0.1 1"/>
+  </material>
+  <material name="material_darkgray">
+    <color rgba="0.3 0.3 0.3 1"/>
+  </material>
+  <material name="material_lightgray">
+    <color rgba="0.5 0.5 0.5 1"/>
+  </material>
   <!-- Macro for creating eddiebot camera stand. -->
-  <!-- <xacro:property name="base_x" value="0.33" /> -->
-  <!-- <xacro:property name="base_y" value="0.33" /> -->
   <!-- 
       These properties must be observed by any machine
       that wants to be defined as a turtlebot. Refer
@@ -18,35 +23,31 @@
       http://www.ros.org/reps/rep-0119.html
   -->
   <!--   <xacro:property name="cam_py" value="-0.0125" /> Y varies for different configurations. This is set in sensors_urdf -->
-  <material name="dark_gray">
-    <color rgba=".2 .2 .2 1"/>
-  </material>
-  <material name="light_grey">
-    <color rgba="0.6 0.6 0.6 1"/>
-  </material>
-  <material name="black">
-    <color rgba="0.1 0.1 0.1 1"/>
-  </material>
   <!-- base_footprint is a fictitious link(frame) that is on the ground right below base_link origin, navigation stack depends on this frame -->
   <link name="base_footprint">
     <inertial>
-      <mass value="1"/>
-      <origin xyz="0.0 0.0 0.0"/>
-      <inertia ixx="0.16666666666666666" ixy="0.0" ixz="0.0" iyy="0.16666666666666666" iyz="0.0" izz="0.16666666666666666"/>
+      <origin xyz="0 0 0"/>
+      <mass value="2"/>
+      <inertia ixx="0.025215166666666664" ixy="0.0" ixz="0.0" iyy="0.025215166666666664" iyz="0.0" izz="0.05040025"/>
     </inertial>
   </link>
+  <joint name="base_footprint_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.10125"/>
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+  </joint>
   <link name="base_link">
     <inertial>
+      <origin xyz="0 0 0"/>
       <mass value="2"/>
-      <origin xyz="0 0 0.0"/>
-      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.5"/>
+      <inertia ixx="0.025215166666666664" ixy="0.0" ixz="0.0" iyy="0.025215166666666664" iyz="0.0" izz="0.05040025"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <cylinder length="0.0095" radius="0.2245"/>
       </geometry>
-      <material name="dark_gray"/>
+      <material name="material_darkgray"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -55,23 +56,18 @@
       </geometry>
     </collision>
   </link>
-  <joint name="base_footprint_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0.10125"/>
-    <parent link="base_footprint"/>
-    <child link="base_link"/>
-  </joint>
   <link name="battery_box">
     <inertial>
-      <mass value="0.001"/>
+      <mass value="1"/>
       <origin xyz="0 0 0"/>
-      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+      <inertia ixx="0.0099255" ixy="0.0" ixz="0.0" iyy="0.0031182733333333336" iyz="0.0" izz="0.012076033333333333"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <box size="0.1778 0.3366 0.0762"/>
       </geometry>
-      <material name="dark_gray"/>
+      <material name="material_darkgray"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -87,20 +83,16 @@
   </joint>
   <link name="front_caster">
     <inertial>
-      <mass value="0.001"/>
       <origin xyz="0 0 0"/>
-      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+      <mass value="0.8"/>
+      <inertia ixx="0.0007480666666666668" ixy="0.0" ixz="0.0" iyy="0.0007480666666666668" iyz="0.0" izz="0.0010000000000000002"/>
     </inertial>
     <visual>
-      <!-- <geometry>
-          <cylinder length="0.061" radius="0.05"/>
-        </geometry>
-        <origin rpy="${M_PI/2} 0 0" xyz="0 0 -0.05"/> -->
       <origin rpy="-1.5707 0 1.5707" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://eddiebot_description/meshes/28971-Caster-Wheel-Kit-v1.0.stl"/>
       </geometry>
-      <material name="light_grey">
+      <material name="material_lightgray">
         <color rgba="0.6 0.6 0.6 1"/>
       </material>
     </visual>
@@ -111,50 +103,50 @@
       <origin rpy="1.5707963267948966 0 0" xyz="0 0 -0.05"/>
     </collision>
   </link>
-  <joint name="front_caster_joint" type="fixed">
+  <joint name="front_caster_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0.18745 0 -0.00475"/>
     <parent link="base_link"/>
     <child link="front_caster"/>
   </joint>
   <link name="rear_caster">
     <inertial>
-      <mass value="0.001"/>
       <origin xyz="0 0 0"/>
-      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+      <mass value="0.8"/>
+      <inertia ixx="0.0007480666666666668" ixy="0.0" ixz="0.0" iyy="0.0007480666666666668" iyz="0.0" izz="0.0010000000000000002"/>
     </inertial>
     <visual>
       <origin rpy="-1.5707 0 1.5707" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://eddiebot_description/meshes/28971-Caster-Wheel-Kit-v1.0.stl"/>
       </geometry>
-      <material name="light_grey">
+      <material name="material_lightgray">
         <color rgba="0.6 0.6 0.6 1"/>
       </material>
     </visual>
     <collision>
       <geometry>
-        <cylinder length="0.061" radius="0.05"/>
+        <sphere radius="0.05"/>
       </geometry>
       <origin rpy="1.5707963267948966 0 0" xyz="0 0 -0.05"/>
     </collision>
   </link>
-  <joint name="rear_caster_joint" type="fixed">
+  <joint name="rear_caster_joint" type="continuous">
     <origin rpy="0 0 0" xyz="-0.18745 0 -0.00475"/>
     <parent link="base_link"/>
     <child link="rear_caster"/>
   </joint>
   <link name="left_axle_link">
     <inertial>
+      <mass value="0.001"/>
       <origin xyz="0 0 0"/>
-      <mass value="0.01"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      <inertia ixx="1.6666666666666666e-10" ixy="0.0" ixz="0.0" iyy="1.6666666666666666e-10" iyz="0.0" izz="1.6666666666666666e-10"/>
     </inertial>
     <visual>
       <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
       <geometry>
         <cylinder length="0.00635" radius="0.00635"/>
       </geometry>
-      <material name="light_grey"/>
+      <material name="material_lightgray"/>
     </visual>
     <collision>
       <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
@@ -164,23 +156,23 @@
     </collision>
   </link>
   <joint name="left_axle_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0.171475 0.0178"/>
+    <origin rpy="0 0 0" xyz="0 0.171475 0.017"/>
     <parent link="battery_box"/>
     <child link="left_axle_link"/>
     <axis xyz="0 1 0"/>
   </joint>
   <link name="right_axle_link">
     <inertial>
+      <mass value="0.001"/>
       <origin xyz="0 0 0"/>
-      <mass value="0.01"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      <inertia ixx="1.6666666666666666e-10" ixy="0.0" ixz="0.0" iyy="1.6666666666666666e-10" iyz="0.0" izz="1.6666666666666666e-10"/>
     </inertial>
     <visual>
       <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
       <geometry>
         <cylinder length="0.00635" radius="0.00635"/>
       </geometry>
-      <material name="light_grey"/>
+      <material name="material_lightgray"/>
     </visual>
     <collision>
       <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
@@ -190,7 +182,7 @@
     </collision>
   </link>
   <joint name="right_axle_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 -0.171475 0.0178"/>
+    <origin rpy="0 0 0" xyz="0 -0.171475 0.017"/>
     <parent link="battery_box"/>
     <child link="right_axle_link"/>
     <axis xyz="0 1 0"/>
@@ -198,26 +190,24 @@
   <link name="left_wheel_link">
     <inertial>
       <origin xyz="0 0 0"/>
-      <mass value="0.01"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      <mass value="0.2"/>
+      <inertia ixx="0.0003071230416666667" ixy="0.0" ixz="0.0" iyy="0.0003071230416666667" iyz="0.0" izz="0.0005806440000000001"/>
     </inertial>
     <visual>
-      <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 0 0"/>
       <geometry>
         <cylinder length="0.03175" radius="0.0762"/>
       </geometry>
-      <material name="black"/>
+      <material name="material_black"/>
     </visual>
     <collision>
-      <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 0 0"/>
       <geometry>
         <cylinder length="0.03175" radius="0.0762"/>
       </geometry>
     </collision>
   </link>
-  <!-- Fixed because we never rotate it anyway, it is just for show -->
-  <!-- NOTE This may prevent gazebo from working with this model -->
-  <joint name="left_wheel_joint" type="fixed">
+  <joint name="left_wheel_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0 0.01905 0"/>
     <parent link="left_axle_link"/>
     <child link="left_wheel_link"/>
@@ -226,68 +216,43 @@
   <link name="right_wheel_link">
     <inertial>
       <origin xyz="0 0 0"/>
-      <mass value="0.01"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      <mass value="0.2"/>
+      <inertia ixx="0.0003071230416666667" ixy="0.0" ixz="0.0" iyy="0.0003071230416666667" iyz="0.0" izz="0.0005806440000000001"/>
     </inertial>
     <visual>
-      <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 0 0"/>
       <geometry>
         <cylinder length="0.03175" radius="0.0762"/>
       </geometry>
-      <material name="black"/>
+      <material name="material_black"/>
     </visual>
     <collision>
-      <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 0 0"/>
       <geometry>
         <cylinder length="0.03175" radius="0.0762"/>
       </geometry>
     </collision>
   </link>
-  <!-- Fixed because we never rotate it anyway, it is just for show -->
-  <!-- NOTE This may prevent gazebo from working with this model -->
-  <joint name="right_wheel_joint" type="fixed">
+  <joint name="right_wheel_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0 -0.01905 0"/>
     <parent link="right_axle_link"/>
     <child link="right_wheel_link"/>
     <axis xyz="0 1 0"/>
   </joint>
-  <link name="ping_sensor_array">
-    <visual>
-      <geometry>
-        <box size="0.0174 0.06 0.0644"/>
-      </geometry>
-      <material name="light_grey"/>
-    </visual>
-    <inertial>
-      <mass value="0.001"/>
-      <origin xyz="0 0 0"/>
-      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
-    </inertial>
-  </link>
-  <!-- This pretends to be in the center in order to aid in calculating degrees from multiple sensors on one fake laser scan -->
-  <joint name="ping_array_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0.03695"/>
-    <parent link="base_link"/>
-    <child link="ping_sensor_array"/>
-  </joint>
-  <link name="ir_sensor_array">
-    <visual>
-      <geometry>
-        <box size="0.0174 0.06 0.0644"/>
-      </geometry>
-      <material name="black"/>
-    </visual>
-    <inertial>
-      <mass value="0.001"/>
-      <origin xyz="0 0 0"/>
-      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
-    </inertial>
-  </link>
-  <joint name="ir_array_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0.03695"/>
-    <parent link="base_link"/>
-    <child link="ir_sensor_array"/>
-  </joint>
+  <!-- Diff Drive -->
+  <gazebo>
+    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <wheel_separation>0.37470000000000003</wheel_separation>
+      <wheel_radius>0.0762</wheel_radius>
+      <odom_publish_frequency>1</odom_publish_frequency>
+      <topic>cmd_vel</topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_footprint</child_frame_id>
+      <odom_topic>/odom</odom_topic>
+    </plugin>
+  </gazebo>
   <joint name="plate_0_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.1365"/>
     <parent link="base_link"/>
@@ -423,38 +388,6 @@
       </geometry>
     </collision>
   </link>
-  <!-- <joint name="plate_1_joint" type="fixed">
-      <origin xyz="0 0 0.1365" rpy="0 0 0" />
-      <parent link="${parent}"/>
-      <child link="plate_1_link" />
-    </joint>
-
-    <link name="plate_1_link">
-      <inertial>
-        <mass value="0.01" />
-        <origin xyz="0 0 0" />
-        <inertia ixx="0.01" ixy="0.0" ixz="0.0"
-          iyy="0.01" iyz="0.0"
-          izz="0.01" />
-      </inertial>
-
-      <visual>
-        <origin xyz=" 0 0 0 " rpy="0 0 0" />
-        <geometry>
-          <cylinder length="0.0095" radius="0.2245"/>
-        </geometry>
-        <material name ="veryDarkGrey">
-          <color rgba=".2 .2 .2 1"/>
-        </material>
-      </visual>
-
-      <collision>
-        <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-        <geometry>
-          <cylinder length="0.0095" radius="0.2245"/>
-        </geometry>
-      </collision>
-    </link> -->
   <!-- Camera mount -->
   <joint name="camera_mount_joint" type="fixed">
     <origin rpy="0 0 0" xyz="-0.140 0.0 0.31555"/>

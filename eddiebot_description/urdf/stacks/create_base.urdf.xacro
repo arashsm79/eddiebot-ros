@@ -1,322 +1,246 @@
 <?xml version="1.0"?>
 <robot name="eddiebot_create_base" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:property name="M_PI" value="3.1415926535897931" />
+  <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/>
 
-  <xacro:macro name="box_inertial_matrix" params="m l w h">
-      <inertia ixx="${(m*(w*w+h*h))/12.0}" ixy = "0.0" ixz = "0.0"
-          iyy="${(m*(l*l+h*h))/12.0}" iyz = "0.0"
-          izz="${(m*(l*l+w*w))/12.0}" />
-  </xacro:macro>
+  <!-- Define robot constants -->
+  <xacro:property name="base_length" value="0.0095"/>
+  <xacro:property name="base_radius" value="0.2245"/>
+  <xacro:property name="base_mass" value="2"/>
+  <xacro:property name="base_link_z_offset" value="0.10125"/>
+
+  <xacro:property name="battery_box_z_offset" value="-0.04285"/>
+  <xacro:property name="battery_box_width" value="0.3366"/>
+
+  <xacro:property name="caster_mass" value="0.5"/>
+  <xacro:property name="caster_radius" value="0.05"/>
+  <xacro:property name="caster_length" value="0.061"/>
+  <xacro:property name="caster_x_offset" value="0.18745"/>
+  <xacro:property name="caster_z_offset" value="-0.00475"/>
+
+  <xacro:property name="axle_radius" value="0.00635"/>
+  <xacro:property name="axle_length" value="0.00635"/>
+  <xacro:property name="axle_y_offset" value="0.171475"/>
+  <xacro:property name="axle_z_offset" value="0.017"/>
+
+  <xacro:property name="wheel_mass" value="0.8"/>
+  <xacro:property name="wheel_radius" value="0.0762"/>
+  <xacro:property name="wheel_width" value="0.03175"/>
+  <xacro:property name="wheel_y_offset" value="0.01905"/>
 
   <xacro:macro name="create_base">
 
-    <material name ="dark_gray">
-      <color rgba=".2 .2 .2 1"/>
-    </material>
-    <material name ="light_grey">
-      <color rgba="0.6 0.6 0.6 1"/>
-    </material>
-    <material name="black">
-        <color rgba="0.1 0.1 0.1 1"/>
-    </material>
-
     <!-- base_footprint is a fictitious link(frame) that is on the ground right below base_link origin, navigation stack depends on this frame -->
     <link name="base_footprint">
-      <inertial>
-        <mass value="1" />
-        <origin xyz="0.0 0.0 0.0" />
-        <xacro:box_inertial_matrix m="1" h="1" l="1" w="1" />
-      </inertial>
+      <xacro:inertial_cylinder mass="${base_mass}" length="${base_length}" radius="${base_radius}"/>
     </link>
-
-    <link name="base_link">
-      <inertial>
-        <mass value="2" />
-        <origin xyz="0 0 0.0" />
-        <inertia ixx="0.01" ixy="0.0" ixz="0.0"
-          iyy="0.01" iyz="0.0" izz="0.5" />
-      </inertial>
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-          <cylinder length="0.0095" radius="0.2245"/>
-        </geometry>
-        <material name ="dark_gray" />
-      </visual>
-      <collision>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-          <cylinder length="0.0095" radius="0.2245"/>
-        </geometry>
-      </collision>
-    </link>
-
     <joint name="base_footprint_joint" type="fixed">
-      <origin xyz="0 0 0.10125" rpy="0 0 0" />        
+      <origin xyz="0 0 ${base_link_z_offset}" rpy="0 0 0" />        
       <parent link="base_footprint"/>
       <child link="base_link" />
     </joint>
 
-    <link name="battery_box">
-      <inertial>
-        <mass value="0.001" />
-        <origin xyz="0 0 0" />
-        <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
-          iyy="0.0001" iyz="0.0"
-          izz="0.0001" />
-      </inertial>
+    <link name="base_link">
+      <xacro:inertial_cylinder mass="${base_mass}" length="${base_length}" radius="${base_radius}"/>
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <box size="0.1778 0.3366 0.0762" />
+          <cylinder length="${base_length}" radius="${base_radius}"/>
         </geometry>
-        <material name ="dark_gray" />
+        <material name ="material_darkgray" />
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <box size="0.1778 0.3366 0.0762" />
+          <cylinder length="${base_length}" radius="${base_radius}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="battery_box">
+      <xacro:inertial_cuboid mass="1" x="0.1778" y="${battery_box_width}" z="0.0762"/>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.1778 ${battery_box_width} 0.0762" />
+        </geometry>
+        <material name ="material_darkgray" />
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.1778 ${battery_box_width} 0.0762" />
         </geometry>
       </collision>
     </link>
 
     <joint name="battery_box_joint" type="fixed">
-      <origin xyz="0 0 -0.04285" rpy="0 0 0" />
+      <origin xyz="0 0 ${battery_box_z_offset}" rpy="0 0 0" />
       <parent link="base_link" />
       <child link="battery_box" />
     </joint>
 
     <link name="front_caster">
-      <inertial>
-        <mass value="0.001" />
-        <origin xyz="0 0 0" />
-        <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
-          iyy="0.0001" iyz="0.0"
-          izz="0.0001" />
-      </inertial>
+      <xacro:inertial_cylinder mass="${caster_mass}" length="${caster_length}" radius="${caster_radius}" />
       <visual>
-        <!-- <geometry>
-          <cylinder length="0.061" radius="0.05"/>
-        </geometry>
-        <origin rpy="${M_PI/2} 0 0" xyz="0 0 -0.05"/> -->
-        <origin xyz="0 0 0" rpy="-1.5707 0 1.5707" />
+        <origin xyz="0 0 0" rpy="-${M_PI/2} 0 ${M_PI/2}" />
         <geometry>
           <mesh filename="package://eddiebot_description/meshes/28971-Caster-Wheel-Kit-v1.0.stl"/>
         </geometry>
-        <material name ="light_grey">
+        <material name ="material_lightgray">
           <color rgba="0.6 0.6 0.6 1"/>
         </material>
       </visual>
       <collision>
         <geometry>
-          <cylinder length="0.061" radius="0.05"/>
+          <cylinder length="${caster_length}" radius="${caster_radius}"/>
         </geometry>
-        <origin rpy="${M_PI/2} 0 0" xyz="0 0 -0.05"/>
+        <origin rpy="${M_PI/2} 0 0" xyz="0 0 -${caster_radius}"/>
       </collision>
     </link>
 
     <joint name="front_caster_joint" type="fixed">
-      <origin xyz="0.18745 0 -0.00475" rpy="0 0 0" />
+      <origin xyz="${caster_x_offset} 0 ${caster_z_offset}" rpy="0 0 0" />
       <parent link="base_link" />
       <child link="front_caster" />
     </joint>
 
     <link name="rear_caster">
-      <inertial>
-        <mass value="0.001" />
-        <origin xyz="0 0 0" />
-        <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
-          iyy="0.0001" iyz="0.0"
-          izz="0.0001" />
-      </inertial>
+      <xacro:inertial_cylinder mass="${caster_mass}" length="${caster_length}" radius="${caster_radius}" />
       <visual>
-        <origin xyz="0 0 0" rpy="-1.5707 0 1.5707" />
+        <origin xyz="0 0 0" rpy="-${M_PI/2} 0 ${M_PI/2}" />
         <geometry>
           <mesh filename="package://eddiebot_description/meshes/28971-Caster-Wheel-Kit-v1.0.stl"/>
         </geometry>
-        <material name ="light_grey">
+        <material name ="material_lightgray">
           <color rgba="0.6 0.6 0.6 1"/>
         </material>
       </visual>
       <collision>
         <geometry>
-          <cylinder length="0.061" radius="0.05"/>
+          <sphere radius="${caster_radius}"/>
         </geometry>
-        <origin rpy="${M_PI/2} 0 0" xyz="0 0 -0.05"/>
+        <origin rpy="${M_PI/2} 0 0" xyz="0 0 -${caster_radius}"/>
       </collision>
     </link>
 
     <joint name="rear_caster_joint" type="fixed">
-      <origin xyz="-0.18745 0 -0.00475" rpy="0 0 0" />
+      <origin xyz="${-caster_x_offset} 0 ${caster_z_offset}" rpy="0 0 0" />
       <parent link="base_link" />
       <child link="rear_caster" />
     </joint>
 
     <link name="left_axle_link">
-      <inertial>
-        <origin xyz="0 0 0"/>
-        <mass value="0.01" />
-        <inertia ixx="0.001" ixy="0.0" ixz="0.0"
-          iyy="0.001" iyz="0.0" izz="0.001" />
-      </inertial>
+      <xacro:inertial_dummy />
       <visual>
-        <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
+        <origin xyz="0 0 0" rpy="0 ${M_PI/2} ${M_PI/2}" />
         <geometry>
-          <cylinder radius="0.00635" length = "0.00635"/>
+          <cylinder radius="${axle_radius}" length = "${axle_length}"/>
         </geometry>
-        <material name ="light_grey" />
+        <material name ="material_lightgray" />
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
+        <origin xyz="0 0 0" rpy="0 ${M_PI/2} ${M_PI/2}" />
         <geometry>
-          <cylinder radius="0.00635" length = "0.00635"/>
+          <cylinder radius="${axle_radius}" length = "${axle_length}"/>
         </geometry>
       </collision>
     </link>
 
     <joint name="left_axle_joint" type="fixed">
-      <origin xyz="0 0.171475 0.0178" rpy="0 0 0"/>
+      <origin xyz="0 ${axle_y_offset} ${axle_z_offset}" rpy="0 0 0"/>
       <parent link="battery_box"/>
       <child link="left_axle_link"/>
       <axis xyz="0 1 0"/>
     </joint>
 
     <link name="right_axle_link">
-      <inertial>
-        <origin xyz="0 0 0"/>
-        <mass value="0.01" />
-        <inertia ixx="0.001" ixy="0.0" ixz="0.0"
-          iyy="0.001" iyz="0.0" izz="0.001" />
-      </inertial>
+      <xacro:inertial_dummy />
       <visual>
-        <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
+        <origin xyz="0 0 0" rpy="0 ${M_PI/2} ${M_PI/2}" />
         <geometry>
-          <cylinder radius="0.00635" length = "0.00635"/>
+          <cylinder radius="${axle_radius}" length = "${axle_length}"/>
         </geometry>
-        <material name ="light_grey" />
+        <material name ="material_lightgray" />
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
+        <origin xyz="0 0 0" rpy="0 ${M_PI/2} ${M_PI/2}" />
         <geometry>
-          <cylinder radius="0.00635" length = "0.00635"/>
+          <cylinder radius="${axle_radius}" length = "${axle_length}"/>
         </geometry>
       </collision>
     </link>
 
     <joint name="right_axle_joint" type="fixed">
-      <origin xyz="0 -0.171475 0.0178" rpy="0 0 0"/>
+      <origin xyz="0 ${-axle_y_offset} ${axle_z_offset}" rpy="0 0 0"/>
       <parent link="battery_box"/>
       <child link="right_axle_link"/>
       <axis xyz="0 1 0"/>
     </joint>
 
     <link name="left_wheel_link">
-      <inertial>
-        <origin xyz="0 0 0"/>
-        <mass value="0.01" />
-        <inertia ixx="0.001" ixy="0.0" ixz="0.0"
-          iyy="0.001" iyz="0.0" izz="0.001" />
-      </inertial>
+      <xacro:inertial_cylinder mass="${wheel_mass}" radius="${wheel_radius}" length="${wheel_width}" />
       <visual>
-        <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
+        <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
         <geometry>
-          <cylinder radius="0.0762" length = "0.03175"/>
+          <cylinder radius="${wheel_radius}" length = "${wheel_width}"/>
         </geometry>
-        <material name ="black" />
+        <material name ="material_black" />
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
+        <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
         <geometry>
-          <cylinder radius="0.0762" length = "0.03175"/>
+          <cylinder radius="${wheel_radius}" length = "${wheel_width}"/>
         </geometry>
       </collision>
     </link>
 
-    <!-- Fixed because we never rotate it anyway, it is just for show -->
-    <!-- NOTE This may prevent gazebo from working with this model -->
-    <joint name="left_wheel_joint" type="fixed">
-      <origin xyz="0 0.01905 0" rpy="0 0 0"/>
+    <joint name="left_wheel_joint" type="continuous">
+      <origin xyz="0 ${wheel_y_offset} 0" rpy="0 0 0"/>
       <parent link="left_axle_link"/>
       <child link="left_wheel_link"/>
       <axis xyz="0 1 0"/>
     </joint>
 
     <link name="right_wheel_link">
-      <inertial>
-        <origin xyz="0 0 0"/>
-        <mass value="0.01" />
-        <inertia ixx="0.001" ixy="0.0" ixz="0.0"
-          iyy="0.001" iyz="0.0" izz="0.001" />
-      </inertial>
+      <xacro:inertial_cylinder mass="${wheel_mass}" radius="${wheel_radius}" length="${wheel_width}" />
       <visual>
-        <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
+        <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
         <geometry>
-          <cylinder radius="0.0762" length = "0.03175"/>
+          <cylinder radius="${wheel_radius}" length = "${wheel_width}"/>
         </geometry>
-        <material name ="black" />
+        <material name ="material_black" />
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 1.5707 1.5707" />
+        <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
         <geometry>
-          <cylinder radius="0.0762" length = "0.03175"/>
+          <cylinder radius="${wheel_radius}" length = "${wheel_width}"/>
         </geometry>
       </collision>
     </link>
 
-    <!-- Fixed because we never rotate it anyway, it is just for show -->
-    <!-- NOTE This may prevent gazebo from working with this model -->
-    <joint name="right_wheel_joint" type="fixed">
-      <origin xyz="0 -0.01905 0" rpy="0 0 0"/>
+    <joint name="right_wheel_joint" type="continuous">
+      <origin xyz="0 -${wheel_y_offset} 0" rpy="0 0 0"/>
       <parent link="right_axle_link"/>
       <child link="right_wheel_link"/>
       <axis xyz="0 1 0"/>
     </joint>
 
-    <link name="ping_sensor_array">
-      <visual>
-        <geometry>
-          <box size="0.0174 0.06 0.0644" />
-        </geometry>
-        <material name ="light_grey" />
-      </visual>
-      <inertial>
-        <mass value="0.001" />
-        <origin xyz="0 0 0" />
-        <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
-          iyy="0.0001" iyz="0.0"
-          izz="0.0001" />
-      </inertial>
-    </link>
+    <!-- Diff Drive -->
+    <gazebo>
+      <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+        <left_joint>left_wheel_joint</left_joint>
+        <right_joint>right_wheel_joint</right_joint>
+        <wheel_separation>${wheel_y_offset*2 + battery_box_width}</wheel_separation>
+        <wheel_radius>${wheel_radius}</wheel_radius>
+        <odom_publish_frequency>1</odom_publish_frequency>
+        <topic>cmd_vel</topic>
+        <frame_id>odom</frame_id>
+        <child_frame_id>base_footprint</child_frame_id>
+        <odom_topic>/odom</odom_topic>
+      </plugin>
+    </gazebo>
 
-    <!-- This pretends to be in the center in order to aid in calculating degrees from multiple sensors on one fake laser scan -->
-    <joint name="ping_array_joint" type="fixed">
-      <origin xyz="0 0 0.03695" rpy="0 0 0" />
-      <parent link="base_link" />
-      <child link="ping_sensor_array" />
-    </joint>
-
-    <link name="ir_sensor_array">
-      <visual>
-        <geometry>
-          <box size="0.0174 0.06 0.0644" />
-        </geometry>
-        <material name ="black" />
-      </visual>
-      <inertial>
-        <mass value="0.001" />
-        <origin xyz="0 0 0" />
-        <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
-          iyy="0.0001" iyz="0.0"
-          izz="0.0001" />
-      </inertial>
-    </link>
-
-    <joint name="ir_array_joint" type="fixed">
-      <origin xyz="0 0 0.03695" rpy="0 0 0" />
-      <parent link="base_link" />
-      <child link="ir_sensor_array" />
-    </joint>
   </xacro:macro>
 
 </robot>

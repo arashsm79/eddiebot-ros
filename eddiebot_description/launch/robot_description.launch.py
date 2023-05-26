@@ -26,12 +26,6 @@ ARGUMENTS = [
 
 
 def generate_launch_description():
-    return LaunchDescription(ARGUMENTS + [
-        OpaqueFunction(function=launch_setup)
-    ])
-
-
-def launch_setup(context, *args, **kwargs):
     pkg_eddiebot_description = get_package_share_directory('eddiebot_description')
     xacro_file = PathJoinSubstitution([pkg_eddiebot_description,
                                        'robots',
@@ -69,8 +63,20 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
+    joint_state_publisher_gui = Node(
+        package='joint_state_publisher_gui',
+        executable='joint_state_publisher_gui',
+        name='joint_state_publisher_gui',
+        output='screen',
+        parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],
+        remappings=[
+            ('/tf', 'tf'),
+            ('/tf_static', 'tf_static')
+        ]
+    )
+
     # Add nodes to LaunchDescription
-    return [
-            robot_state_publisher,
-            joint_state_publisher
-    ]
+    ld = LaunchDescription(ARGUMENTS)
+    ld.add_action(joint_state_publisher)
+    ld.add_action(robot_state_publisher)
+    return ld

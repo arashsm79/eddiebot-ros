@@ -2,10 +2,6 @@
 <robot name="eddiebot_hardware" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- Macro for creating eddiebot circle stack. -->
-
-  <!-- <xacro:property name="base_x" value="0.33" /> -->
-  <!-- <xacro:property name="base_y" value="0.33" /> -->
-
   <xacro:macro name="eddiebot_standoff_5in" params="parent number x_loc y_loc z_loc">
     <joint name="standoff_5in_${number}_joint" type="fixed">
       <origin xyz="${x_loc} ${y_loc} ${z_loc}" rpy="0 0 0" />
