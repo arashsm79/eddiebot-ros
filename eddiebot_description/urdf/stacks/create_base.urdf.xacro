@@ -21,7 +21,7 @@
   <xacro:property name="axle_radius" value="0.00635"/>
   <xacro:property name="axle_length" value="0.00635"/>
   <xacro:property name="axle_y_offset" value="0.171475"/>
-  <xacro:property name="axle_z_offset" value="0.017"/>
+  <xacro:property name="axle_z_offset" value="0.014"/>
 
   <xacro:property name="wheel_mass" value="0.8"/>
   <xacro:property name="wheel_radius" value="0.0762"/>
@@ -98,6 +98,14 @@
         <origin rpy="${M_PI/2} 0 0" xyz="0 0 -${caster_radius}"/>
       </collision>
     </link>
+    <gazebo reference="front_caster">
+      <mu1 value="0.0"/>
+      <mu2 value="0.0"/>
+      <kp value="10000000.0"/>
+      <kd value="1.0"/>
+      <fdir1 value="1 0 0"/>
+      <turnGravityOff>false</turnGravityOff>
+    </gazebo>
 
     <joint name="front_caster_joint" type="fixed">
       <origin xyz="${caster_x_offset} 0 ${caster_z_offset}" rpy="0 0 0" />
@@ -123,6 +131,14 @@
         <origin rpy="${M_PI/2} 0 0" xyz="0 0 -${caster_radius}"/>
       </collision>
     </link>
+    <gazebo reference="rear_caster">
+      <mu1 value="0.0"/>
+      <mu2 value="0.0"/>
+      <kp value="10000000.0"/>
+      <kd value="1.0"/>
+      <fdir1 value="1 0 0"/>
+      <turnGravityOff>false</turnGravityOff>
+    </gazebo>
 
     <joint name="rear_caster_joint" type="fixed">
       <origin xyz="${-caster_x_offset} 0 ${caster_z_offset}" rpy="0 0 0" />

@@ -12,12 +12,4 @@
   <xacro:camera_stand parent="plate_0_link"/>
   <xacro:sensor_kinect parent="camera_mount_link"/>
 
-  <!-- Listening on /model/$name/cmd_vel for velocity commands to move the robot -->
-  <gazebo>
-    <plugin
-      filename="gz-sim-velocity-control-system"
-      name="gz::sim::systems::VelocityControl">
-    </plugin>
-  </gazebo>
-
 </robot>
