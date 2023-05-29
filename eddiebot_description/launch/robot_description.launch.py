@@ -56,7 +56,10 @@ def generate_launch_description():
         executable='joint_state_publisher',
         name='joint_state_publisher',
         output='screen',
-        parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],
+        parameters=[
+            {'use_sim_time': LaunchConfiguration('use_sim_time')},
+            {'source_list': ['/model/eddiebot/joint_states']},
+            ],
         remappings=[
             ('/tf', 'tf'),
             ('/tf_static', 'tf_static')

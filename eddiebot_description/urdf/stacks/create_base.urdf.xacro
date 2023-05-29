@@ -251,6 +251,11 @@
         <odom_publish_frequency>1</odom_publish_frequency>
         <topic>cmd_vel</topic>
       </plugin>
+      <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+        <joint_name>left_wheel_joint</joint_name>
+        <joint_name>right_wheel_joint</joint_name>
+        <topic>model/eddiebot/joint_states</topic>
+      </plugin>
     </gazebo>
 
   </xacro:macro>

@@ -15,6 +15,8 @@ from launch_ros.actions import Node
 ARGUMENTS = [
     DeclareLaunchArgument('world', default_value='empty',
                           description='Gazebo World'),
+    DeclareLaunchArgument('use_sim_time', default_value='false',
+                          description='Use simulation (Gazebo) clock if true'),
 ]
 
 
@@ -53,7 +55,7 @@ def generate_launch_description():
                         name='clock_bridge',
                         output='screen',
                         arguments=[
-                            '/clock' + '@rosgraph_msgs/msg/Clock' + '@gz.msgs.Clock'
+                            '/clock' + '@rosgraph_msgs/msg/Clock' + '[gz.msgs.Clock'
                         ])
 
     # Create launch description and add actions

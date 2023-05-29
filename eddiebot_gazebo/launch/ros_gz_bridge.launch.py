@@ -32,100 +32,112 @@ def generate_launch_description():
     namespace = LaunchConfiguration('namespace')
     world = LaunchConfiguration('world')
 
-    # lidar bridge
-    lidar_bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        name='lidar_bridge',
-        output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time
-        }],
-        arguments=[
-            ['/world/', world,
-             '/model/', robot_name,
-             '/lidar/scan' +
-             '@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan']
-        ])
-
-    # Camera sensor bridge
-    kinect_camera_bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        name='camera_bridge',
-        output='screen',
-        parameters=[{'use_sim_time': use_sim_time}],
-        arguments=[
-            ['/world/', world,
-             '/model/', robot_name,
-             '/kinect_rgbd_camera/image' +
-             '@sensor_msgs/msg/Image' +
-             '[gz.msgs.Image'],
-            ['/world/', world,
-             '/model/', robot_name,
-             '/kinect_rgbd_camera/depth_image' +
-             '@sensor_msgs/msg/Image' +
-             '[gz.msgs.Image'],
-            ['/world/', world,
-             '/model/', robot_name,
-             '/kinect_rgbd_camera/points' +
-             '@sensor_msgs/msg/PointCloud2' +
-             '[gz.msgs.PointCloudPacked'],
-            ['/world/', world,
-             '/model/', robot_name,
-             '/kinect_rgbd_camera/camera_info' +
-             '@sensor_msgs/msg/CameraInfo' +
-             '[gz.msgs.CameraInfo'],
-            ],
-    )
-
-    cmd_vel_bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        name='cmd_vel_bridge',
-        output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time
-        }],
-        arguments=[
-            [namespace,
-             '/cmd_vel' + '@geometry_msgs/msg/Twist' + '[gz.msgs.Twist'],
-            ['/model/', robot_name, '/cmd_vel' +
-             '@geometry_msgs/msg/Twist' +
-             ']gz.msgs.Twist']
-        ])
-
-    pose_bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        name='pose_bridge',
-        output='screen',
-        parameters=[{
-             'use_sim_time': use_sim_time
-        }],
-        arguments=[
-            ['/model/', robot_name, '/pose' +
-             '@tf2_msgs/msg/TFMessage' +
-             '[gz.msgs.Pose_V']
-        ])
-
-    # odom to base_link transform bridge
-    odom_base_tf_bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        name='odom_base_tf_bridge',
-        output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time
-        }],
-        arguments=[
-            ['/model/', robot_name, '/tf' +
-             '@tf2_msgs/msg/TFMessage' +
-             '[gz.msgs.Pose_V']
-        ])
-
     # Define LaunchDescription variable
+    jointstate_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='joint_states_bridge',
+        output='screen',
+        parameters=[{
+            'use_sim_time': use_sim_time
+        }],
+        arguments=[
+            ['/model/eddiebot/joint_states' +
+             '@sensor_msgs/msg/JointState@gz.msgs.Model']
+        ])
     ld = LaunchDescription(ARGUMENTS)
-    # ld.add_action(lidar_bridge)
-    ld.add_action(kinect_camera_bridge)
+    ld.add_action(jointstate_bridge)
     return ld
+
+    # we don't need the below bridges for now
+    # lidar bridge
+    # lidar_bridge = Node(
+    #     package='ros_gz_bridge',
+    #     executable='parameter_bridge',
+    #     name='lidar_bridge',
+    #     output='screen',
+    #     parameters=[{
+    #         'use_sim_time': use_sim_time
+    #     }],
+    #     arguments=[
+    #         ['/world/', world,
+    #          '/model/', robot_name,
+    #          '/lidar/scan' +
+    #          '@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan']
+    #     ])
+
+    # # Camera sensor bridge
+    # kinect_camera_bridge = Node(
+    #     package='ros_gz_bridge',
+    #     executable='parameter_bridge',
+    #     name='camera_bridge',
+    #     output='screen',
+    #     parameters=[{'use_sim_time': use_sim_time}],
+    #     arguments=[
+    #         ['/world/', world,
+    #          '/model/', robot_name,
+    #          '/kinect_rgbd_camera/image' +
+    #          '@sensor_msgs/msg/Image' +
+    #          '[gz.msgs.Image'],
+    #         ['/world/', world,
+    #          '/model/', robot_name,
+    #          '/kinect_rgbd_camera/depth_image' +
+    #          '@sensor_msgs/msg/Image' +
+    #          '[gz.msgs.Image'],
+    #         ['/world/', world,
+    #          '/model/', robot_name,
+    #          '/kinect_rgbd_camera/points' +
+    #          '@sensor_msgs/msg/PointCloud2' +
+    #          '[gz.msgs.PointCloudPacked'],
+    #         ['/world/', world,
+    #          '/model/', robot_name,
+    #          '/kinect_rgbd_camera/camera_info' +
+    #          '@sensor_msgs/msg/CameraInfo' +
+    #          '[gz.msgs.CameraInfo'],
+    #         ],
+    # )
+
+    # cmd_vel_bridge = Node(
+    #     package='ros_gz_bridge',
+    #     executable='parameter_bridge',
+    #     name='cmd_vel_bridge',
+    #     output='screen',
+    #     parameters=[{
+    #         'use_sim_time': use_sim_time
+    #     }],
+    #     arguments=[
+    #         [namespace,
+    #          '/cmd_vel' + '@geometry_msgs/msg/Twist' + '[gz.msgs.Twist'],
+    #         ['/model/', robot_name, '/cmd_vel' +
+    #          '@geometry_msgs/msg/Twist' +
+    #          ']gz.msgs.Twist']
+    #     ])
+
+    # pose_bridge = Node(
+    #     package='ros_gz_bridge',
+    #     executable='parameter_bridge',
+    #     name='pose_bridge',
+    #     output='screen',
+    #     parameters=[{
+    #          'use_sim_time': use_sim_time
+    #     }],
+    #     arguments=[
+    #         ['/model/', robot_name, '/pose' +
+    #          '@tf2_msgs/msg/TFMessage' +
+    #          '[gz.msgs.Pose_V']
+    #     ])
+
+    # # odom to base_link transform bridge
+    # odom_base_tf_bridge = Node(
+    #     package='ros_gz_bridge',
+    #     executable='parameter_bridge',
+    #     name='odom_base_tf_bridge',
+    #     output='screen',
+    #     parameters=[{
+    #         'use_sim_time': use_sim_time
+    #     }],
+    #     arguments=[
+    #         ['/model/', robot_name, '/tf' +
+    #          '@tf2_msgs/msg/TFMessage' +
+    #          '[gz.msgs.Pose_V']
+    #     ])

@@ -15,6 +15,10 @@ ARGUMENTS = [
     DeclareLaunchArgument('model', default_value='eddie_kinect_v1',
                           choices=['eddie_kinect_v1'],
                           description='Eddiebot Model'),
+    DeclareLaunchArgument('use_sim_time', default_value='false',
+                          choices=['true', 'false'],
+                          description='use_sim_time'),
+
 ]
 
 for pose_element in ['x', 'y', 'z', 'yaw']:
@@ -44,6 +48,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource([robot_spawn_launch]),
         launch_arguments=[
             ('namespace', LaunchConfiguration('namespace')),
+            ('use_sim_time', LaunchConfiguration('use_sim_time')),
             ('x', LaunchConfiguration('x')),
             ('y', LaunchConfiguration('y')),
             ('z', LaunchConfiguration('z')),

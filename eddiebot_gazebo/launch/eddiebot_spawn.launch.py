@@ -14,6 +14,10 @@ ARGUMENTS = [
                           description='Eddiebot Model'),
     DeclareLaunchArgument('namespace', default_value='',
                           description='Robot namespace'),
+    DeclareLaunchArgument('use_sim_time', default_value='false',
+                          choices=['true', 'false'],
+                          description='use_sim_time'),
+
 ]
 
 for pose_element in ['x', 'y', 'z', 'yaw']:
@@ -26,9 +30,11 @@ def generate_launch_description():
     # Directories
     pkg_eddiebot_description = get_package_share_directory(
         'eddiebot_description')
+    pkg_eddiebot_gazebo = get_package_share_directory(
+        'eddiebot_gazebo')
 
     # Paths
-    # eddiebot_ros_gz_bridge_launch = PathJoinSubstitution([pkg_eddiebot_gazebo, 'launch', 'ros_gz_bridge.launch.py'])
+    eddiebot_ros_gz_bridge_launch = PathJoinSubstitution([pkg_eddiebot_gazebo, 'launch', 'ros_gz_bridge.launch.py'])
     robot_description_launch = PathJoinSubstitution(
         [pkg_eddiebot_description, 'launch', 'robot_description.launch.py'])
 
@@ -45,7 +51,8 @@ def generate_launch_description():
         # Robot description
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([robot_description_launch]),
-            launch_arguments=[('model', LaunchConfiguration('model'))]
+            launch_arguments=[('model', LaunchConfiguration('model')),
+                              ('use_sim_time', LaunchConfiguration('use_sim_time'))]
         ),
 
         # Spawn Eddiebot
@@ -62,13 +69,13 @@ def generate_launch_description():
         ),
 
         # ROS GZ bridge
-        # IncludeLaunchDescription(
-        #     PythonLaunchDescriptionSource([eddiebot_ros_gz_bridge_launch]),
-        #     launch_arguments=[
-        #         ('model', LaunchConfiguration('model')),
-        #         ('robot_name', robot_name),
-        #         ('namespace', namespace)]
-        # ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([eddiebot_ros_gz_bridge_launch]),
+            launch_arguments=[
+                ('model', LaunchConfiguration('model')),
+                ('robot_name', robot_name),
+                ('namespace', namespace)]
+        ),
     ])
 
     # Define LaunchDescription variable
