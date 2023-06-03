@@ -34,39 +34,78 @@
  */
 
 #ifndef _EDDIE_TELEOP_H
-#define	_EDDIE_TELEOP_H
+#define _EDDIE_TELEOP_H
 
-#include <signal.h>
-#include <termios.h>
-#include <stdio.h>
 #include <fcntl.h>
+#include <functional>
+#include <signal.h>
+#include <stdexcept>
+#include <stdio.h>
+#include <termios.h>
+#include <thread>
+#include <unistd.h>
 
-#include "rclcpp/rclcpp.hpp"
-#include "eddiebot_msgs/msg/velocity.hpp"
 #include "eddiebot_msgs/msg/key_stroke.hpp"
+#include "eddiebot_msgs/msg/velocity.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 #define KEYCODE_U 0x41
 #define KEYCODE_D 0x42
 #define KEYCODE_R 0x43
 #define KEYCODE_L 0x44
 
-
 int kfd = 0;
 struct termios cooked, raw;
 
-class EddieTeleop
-{
+class KeyboardReader final {
+public:
+  KeyboardReader() {
+    // get the console in raw mode
+    if (tcgetattr(0, &cooked_) < 0) {
+      throw std::runtime_error("Failed to get old console mode");
+    }
+    struct termios raw;
+    memcpy(&raw, &cooked_, sizeof(struct termios));
+    raw.c_lflag &= ~(ICANON | ECHO);
+    // Setting a new line, then end of file
+    raw.c_cc[VEOL] = 1;
+    raw.c_cc[VEOF] = 2;
+    raw.c_cc[VTIME] = 1;
+    raw.c_cc[VMIN] = 0;
+    if (tcsetattr(0, TCSANOW, &raw) < 0) {
+      throw std::runtime_error("Failed to set new console mode");
+    }
+  }
+
+  char readOne() {
+    char c = 0;
+
+    int rc = read(0, &c, 1);
+    if (rc < 0) {
+      throw std::runtime_error("read failed");
+    }
+    return c;
+  }
+
+  ~KeyboardReader() { tcsetattr(0, TCSANOW, &cooked_); }
+
+private:
+  struct termios cooked_;
+};
+
+class EddieTeleop {
 public:
   EddieTeleop(std::shared_ptr<rclcpp::Node>);
-  void keyLoop();
+  int keyLoop();
 
 private:
   std::shared_ptr<rclcpp::Node> node_handle_;
   rclcpp::Publisher<eddiebot_msgs::msg::Velocity>::SharedPtr velocity_pub_;
   rclcpp::Publisher<eddiebot_msgs::msg::KeyStroke>::SharedPtr keystroke_pub_;
+  KeyboardReader input_;
+  void spin();
   float linear_, angular_;
   double l_scale_, a_scale_;
-
 };
 
-#endif	/* _EDDIE_TELEOP_H */
+#endif /* _EDDIE_TELEOP_H */
