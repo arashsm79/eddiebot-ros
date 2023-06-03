@@ -89,7 +89,7 @@ EddieController::EddieController(std::shared_ptr<rclcpp::Node> node_handle)
 
   velocity_sub_ =
       node_handle_->create_subscription<eddiebot_msgs::msg::Velocity>(
-          "/eddie/command_velocity", 1,
+          "/eddie/simple_velocity", 1,
           std::bind(&EddieController::velocityCallback, this,
                     std::placeholders::_1));
   ping_distances_sub_ =

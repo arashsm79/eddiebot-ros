@@ -5,7 +5,7 @@
   
   <xacro:property name="kinect_cam_py" value="-0.0125"/>
   <xacro:property name="kinect_cam_pz" value="0.055" />
-  <!-- Parameterised in part by the values in turtlebot_properties.urdf.xacro -->
+
   <xacro:macro name="sensor_kinect" params="parent">
     <joint name="camera_rgb_joint" type="fixed">
       <origin xyz="${cam_px} ${kinect_cam_py} ${kinect_cam_pz}" rpy="${cam_or} ${cam_op} ${cam_oy}"/>

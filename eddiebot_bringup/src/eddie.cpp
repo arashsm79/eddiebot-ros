@@ -136,7 +136,7 @@ Eddie::~Eddie() {
 
 void Eddie::initialize(std::string port) {
   RCLCPP_INFO(node_handle_->get_logger(),
-              "Initializing Parallax board serial port connection");
+              "Initializing Parallax board serial port connection on %s", port.c_str());
 
   memset(&tio, 0, sizeof(tio));
   tio.c_iflag = 0;
@@ -172,14 +172,15 @@ std::string Eddie::command(std::string str) {
   command[size - 1] = PACKET_TERMINATOR; // Having exces terminator is okay,
                                          // it's good to guarantee
 
+  RCLCPP_INFO(node_handle_->get_logger(),
+               "Sending command %s to eddie.", str.c_str());
   _written = write(tty_fd, command, size);
   while (read(tty_fd, &c, 1) <= 0) {
     usleep(1000);
     count++;
     if (count >= 80) {
       RCLCPP_ERROR(node_handle_->get_logger(),
-                   "ERROR: NO PARALLAX EDDIE ROBOT IS CONNECTED.");
-      RCLCPP_ERROR(node_handle_->get_logger(), "%s", str.c_str());
+                   "ERROR: No parallax eddie robot is connected. Command '%s' failed.", str.c_str());
       break;
     }
   }

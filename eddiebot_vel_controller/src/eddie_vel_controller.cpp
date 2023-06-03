@@ -5,10 +5,10 @@ using namespace std;
 
 EddieVelController::EddieVelController(std::shared_ptr<rclcpp::Node> node_handle) : node_handle_(node_handle)
 {
-    vel_pub_ = node_handle_->create_publisher<eddiebot_msgs::msg::Velocity>("/eddie/cmd_vel", 5);
+    vel_pub_ = node_handle_->create_publisher<eddiebot_msgs::msg::Velocity>("/eddie/simple_velocity", 5);
 
     cmd_vel_sub_ = node_handle_->create_subscription<geometry_msgs::msg::Twist>(
-          "/eddie/raw_cmd_vel", 1,
+          "/eddie/cmd_vel", 1,
           std::bind(&EddieVelController::cmd_vel_callback_, this,
                     std::placeholders::_1));
 }
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
 
-    auto node_handle = rclcpp::Node::make_shared("eddie_vel_controll");
+    auto node_handle = rclcpp::Node::make_shared("eddie_vel_control");
     EddieVelController eddie_vel_controller(node_handle);
 
     rclcpp::spin(node_handle);
