@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot name="eddiebot_create_base" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/>
+  <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ultrasonic_sensor.urdf.xacro"/>
 
   <!-- Define robot constants -->
   <xacro:property name="base_length" value="0.0095"/>
@@ -257,6 +257,9 @@
         <topic>model/eddiebot/joint_states</topic>
       </plugin>
     </gazebo>
+
+    <xacro:ultrasonic_sensor topic_name="ultrasonic1" sensor_name="usen1" link_name="ul1" joint_name='uj1' parent="base_link" x="0.205" y="0.07" z="0.015" roll="0" pitch="0" yaw="${M_PI/8}"/>
+    <xacro:ultrasonic_sensor topic_name="ultrasonic2" sensor_name="usen2" link_name="ul2" joint_name='uj2' parent="base_link" x="0.205" y="-0.07" z="0.015" roll="0" pitch="0" yaw="${-M_PI/8}"/>
 
   </xacro:macro>
 
