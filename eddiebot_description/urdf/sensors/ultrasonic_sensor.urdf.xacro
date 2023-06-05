@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <robot name="ultrasonic_sensor" xmlns:xacro="http://ros.org/wiki/xacro">
     
-    <xacro:property name="length" value="0.06"/>
-    <xacro:property name="width" value="0.01" />
+    <xacro:property name="length" value="0.01"/>
+    <xacro:property name="width" value="0.06" />
     <xacro:property name="height" value="0.03" />
 
     <xacro:macro name="ultrasonic_sensor_sim" params="name parent topic x y z roll pitch yaw linkname jointname">
