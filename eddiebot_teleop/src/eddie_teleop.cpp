@@ -100,8 +100,8 @@ int EddieTeleop::keyLoop() {
       linear_ = 0;
       break;
     default:
-      break;
       valid_key = false;
+      break;
     }
 
     if(valid_key) {

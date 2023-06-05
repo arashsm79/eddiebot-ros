@@ -68,6 +68,26 @@ def generate_launch_description():
             output='screen'
         ),
 
+        # Use RGBD sensor as a LIDAR
+        Node(
+            package='depthimage_to_laserscan',
+            executable='depthimage_to_laserscan_node',
+            name='depthimage_to_laserscan',
+            output='screen',
+            parameters=[
+                {'use_sim_time': LaunchConfiguration('use_sim_time')},
+                {'scan_time': 0.033},
+                {'range_min': 0.45},
+                {'range_max': 12.0},
+                {'scan_height': 1},
+                {'output_frame': 'camera_depth_frame'},
+            ],
+            remappings=[
+                ('depth_camera_info', '/kinect_rgbd_camera/camera_info'),
+                ('depth', '/kinect_rgbd_camera/depth_image')
+            ]
+        ),
+
         # ROS GZ bridge
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([eddiebot_ros_gz_bridge_launch]),

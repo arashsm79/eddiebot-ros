@@ -357,6 +357,7 @@ bool Eddie::driveWithPower(
       req->right > MOTOR_POWER_MAX_FORWARD ||
       req->left < MOTOR_POWER_MAX_REVERSE ||
       req->right < MOTOR_POWER_MAX_REVERSE) {
+    RCLCPP_ERROR(node_handle_->get_logger(), "drive_with_power failed. Power out of bounds: left %d, right: %d", req->left, req->right);
     return false;
   }
   std::string cmd;
@@ -378,6 +379,7 @@ bool Eddie::driveWithSpeed(
       req->right > TRAVEL_SPEED_MAX_FORWARD ||
       req->left < TRAVEL_SPEED_MAX_REVERSE ||
       req->right < TRAVEL_SPEED_MAX_REVERSE) {
+    RCLCPP_ERROR(node_handle_->get_logger(), "drive_with_speed failed. Speed out of bounds: left %d, right: %d", req->left, req->right);
     return false;
   }
   std::string cmd;
@@ -497,9 +499,9 @@ int main(int argc, char **argv) {
   rclcpp::Rate loop_rate(5);
 
   while (rclcpp::ok()) {
-    eddie.publishPingData();
-    eddie.publishADCData();
-    eddie.publishEncodersData();
+    // eddie.publishPingData();
+    // eddie.publishADCData();
+    // eddie.publishEncodersData();
 
     rclcpp::spin_some(node_handle);
     loop_rate.sleep();

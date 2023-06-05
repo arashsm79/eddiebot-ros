@@ -18,7 +18,7 @@
                     </image>
                     <clip>
                         <near>0.05</near>
-                        <far>8.0</far>
+                        <far>12.0</far>
                     </clip>
                     <distortion>
                         <k1>0.0</k1>
@@ -45,13 +45,13 @@
                     <depth_camera>
                         <clip>
                             <near>0.05</near>
-                            <far>8.0</far>
+                            <far>12.0</far>
                         </clip>
                     </depth_camera>
                 </camera>
                 <always_on>1</always_on>
-                <update_rate>20</update_rate>
-                <visualize>true</visualize>
+                <update_rate>5</update_rate>
+                <visualize>false</visualize>
                 <topic>kinect_rgbd_camera</topic>
                 <enable_metrics>true</enable_metrics>
             </sensor>

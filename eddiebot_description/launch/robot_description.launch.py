@@ -45,10 +45,6 @@ def generate_launch_description():
                 'gazebo:=ignition', ' ',
                 'namespace:=', namespace]), value_type=str)},
         ],
-        remappings=[
-            ('/tf', 'tf'),
-            ('/tf_static', 'tf_static')
-        ]
     )
 
     joint_state_publisher = Node(
@@ -59,11 +55,7 @@ def generate_launch_description():
         parameters=[
             {'use_sim_time': LaunchConfiguration('use_sim_time')},
             {'source_list': ['/model/eddiebot/joint_states']},
-            ],
-        remappings=[
-            ('/tf', 'tf'),
-            ('/tf_static', 'tf_static')
-        ]
+        ],
     )
 
     joint_state_publisher_gui = Node(
@@ -72,10 +64,6 @@ def generate_launch_description():
         name='joint_state_publisher_gui',
         output='screen',
         parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],
-        remappings=[
-            ('/tf', 'tf'),
-            ('/tf_static', 'tf_static')
-        ]
     )
 
     # Add nodes to LaunchDescription

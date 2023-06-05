@@ -40,7 +40,7 @@
 using namespace std::chrono_literals;
 
 EddieController::EddieController(std::shared_ptr<rclcpp::Node> node_handle)
-    : node_handle_(node_handle), left_power_(60), right_power_(62),
+    : node_handle_(node_handle), left_power_(60), right_power_(60),
       rotation_power_(40), acceleration_power_(30), deceleration_power_(100),
       min_power_(32), left_speed_(36), right_speed_(36),
       rotation_speed_(36), acceleration_speed_(36), linear_scale_(1.0), angular_scale_(1.0) {
@@ -194,8 +194,7 @@ bool EddieController::getStatus(
 }
 
 void EddieController::stop() {
-  auto dist_req =
-      std::make_shared<eddiebot_msgs::srv::StopAtDistance::Request>();
+  auto dist_req = std::make_shared<eddiebot_msgs::srv::StopAtDistance::Request>();
   dist_req->distance = 4;
 
   sem_wait(&mutex_interrupt_);
@@ -204,23 +203,12 @@ void EddieController::stop() {
 
   while (!eddie_stop_->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
-      RCLCPP_ERROR(node_handle_->get_logger(),
-                   "Interrupted while waiting for the service. Exiting.");
+      RCLCPP_ERROR(node_handle_->get_logger(), "Interrupted while waiting for the service. Exiting.");
       return;
     }
-    RCLCPP_INFO(node_handle_->get_logger(),
-                "Service not available, waiting again...");
+    RCLCPP_INFO(node_handle_->get_logger(), "Service not available, waiting again...");
   }
   auto result = eddie_stop_->async_send_request(dist_req);
-  if (rclcpp::spin_until_future_complete(node_handle_, result) ==
-      rclcpp::FutureReturnCode::SUCCESS) {
-    RCLCPP_ERROR(node_handle_->get_logger(),
-                 "Sent Eddie stop request to service.");
-  } else {
-    RCLCPP_ERROR(
-        node_handle_->get_logger(),
-        "ERROR: at trying to stop Eddie. Trying to auto send command again...");
-  }
 
   current_power_ = 0;
 }
@@ -232,21 +220,16 @@ void EddieController::setAccelerationRate(int rate) {
 
   while (!eddie_acceleration_rate_->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
-      RCLCPP_ERROR(node_handle_->get_logger(),
-                   "Interrupted while waiting for the service. Exiting.");
+      RCLCPP_ERROR(node_handle_->get_logger(), "Interrupted while waiting for the service. Exiting.");
       return;
     }
-    RCLCPP_INFO(node_handle_->get_logger(),
-                "Service not available, waiting again...");
+    RCLCPP_INFO(node_handle_->get_logger(), "Service not available, waiting again...");
   }
   auto result = eddie_acceleration_rate_->async_send_request(acc_req);
-  if (rclcpp::spin_until_future_complete(node_handle_, result) ==
-      rclcpp::FutureReturnCode::SUCCESS) {
-    RCLCPP_ERROR(node_handle_->get_logger(),
-                 "Sent Eddie acceleration rate request to service.");
+  if (rclcpp::spin_until_future_complete(node_handle_, result) == rclcpp::FutureReturnCode::SUCCESS) {
+    RCLCPP_INFO(node_handle_->get_logger(), "Sent Eddie acceleration rate request to service.");
   } else {
-    RCLCPP_ERROR(node_handle_->get_logger(),
-                 "ERROR: Failed to set acceleration rate to %d", rate);
+    RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: Failed to set acceleration rate to %d", rate);
   }
 }
 
@@ -339,7 +322,7 @@ void EddieController::drive(int8_t left, int8_t right) {
       auto result = eddie_drive_power_->async_send_request(power_req);
       if (rclcpp::spin_until_future_complete(node_handle_, result) ==
           rclcpp::FutureReturnCode::SUCCESS) {
-        RCLCPP_ERROR(node_handle_->get_logger(),
+        RCLCPP_INFO(node_handle_->get_logger(),
                      "Sent Eddie drive power request to service.");
         last_cmd_time_ = node_handle_->get_clock()->now();
       } else {
@@ -399,7 +382,7 @@ void EddieController::rotate(int16_t angular) {
   auto result = eddie_reset_->async_send_request(reset_req);
   if (rclcpp::spin_until_future_complete(node_handle_, result) ==
       rclcpp::FutureReturnCode::SUCCESS) {
-    RCLCPP_ERROR(node_handle_->get_logger(),
+    RCLCPP_INFO(node_handle_->get_logger(),
                  "Sent Eddie reset request to service.");
   } else {
     RCLCPP_ERROR(node_handle_->get_logger(),
@@ -419,7 +402,7 @@ void EddieController::rotate(int16_t angular) {
   auto future = eddie_heading_->async_send_request(heading_req);
   if (rclcpp::spin_until_future_complete(node_handle_, future) ==
       rclcpp::FutureReturnCode::SUCCESS) {
-    RCLCPP_ERROR(node_handle_->get_logger(),
+    RCLCPP_INFO(node_handle_->get_logger(),
                  "Sent Eddie heading request to service.");
   } else {
     RCLCPP_ERROR(node_handle_->get_logger(),
@@ -458,7 +441,7 @@ void EddieController::rotate(int16_t angular) {
       auto future = eddie_heading_->async_send_request(heading_req);
       if (rclcpp::spin_until_future_complete(node_handle_, future) ==
           rclcpp::FutureReturnCode::SUCCESS) {
-        RCLCPP_ERROR(node_handle_->get_logger(),
+        RCLCPP_INFO(node_handle_->get_logger(),
                      "Sent Eddie heading request to service.");
       } else {
         RCLCPP_ERROR(node_handle_->get_logger(),
@@ -489,21 +472,16 @@ void EddieController::rotate(int16_t angular) {
         dist_req->distance = 2;
         while (!eddie_stop_->wait_for_service(1s)) {
           if (!rclcpp::ok()) {
-            RCLCPP_ERROR(node_handle_->get_logger(),
-                         "Interrupted while waiting for the service. Exiting.");
+            RCLCPP_ERROR(node_handle_->get_logger(), "Interrupted while waiting for the service. Exiting.");
             return;
           }
-          RCLCPP_INFO(node_handle_->get_logger(),
-                      "Service not available, waiting again...");
+          RCLCPP_INFO(node_handle_->get_logger(), "Service not available, waiting again...");
         }
         auto result = eddie_stop_->async_send_request(dist_req);
-        if (rclcpp::spin_until_future_complete(node_handle_, result) ==
-            rclcpp::FutureReturnCode::SUCCESS) {
-          RCLCPP_ERROR(node_handle_->get_logger(),
-                       "Sent Eddie stop request to service.");
+        if (rclcpp::spin_until_future_complete(node_handle_, result) == rclcpp::FutureReturnCode::SUCCESS) {
+          RCLCPP_INFO(node_handle_->get_logger(), "Sent Eddie stop request to service.");
         } else {
-          RCLCPP_ERROR(node_handle_->get_logger(),
-                       "ERROR: at trying to stop Eddie.");
+          RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: at trying to stop Eddie.");
         }
         current_power_ = 0;
       } else {
@@ -523,7 +501,7 @@ void EddieController::rotate(int16_t angular) {
         auto result = eddie_drive_power_->async_send_request(power_req);
         if (rclcpp::spin_until_future_complete(node_handle_, result) ==
             rclcpp::FutureReturnCode::SUCCESS) {
-          RCLCPP_ERROR(node_handle_->get_logger(),
+          RCLCPP_INFO(node_handle_->get_logger(),
                        "Sent Eddie drive power request to service.");
           last_cmd_time_ = node_handle_->get_clock()->now();
         } else {
