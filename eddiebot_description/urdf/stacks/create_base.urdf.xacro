@@ -3,6 +3,8 @@
 
   <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/>
 
+  <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ultrasonic_sensor.urdf.xacro"/>
+
   <!-- Define robot constants -->
   <xacro:property name="base_length" value="0.0095"/>
   <xacro:property name="base_radius" value="0.2245"/>
@@ -257,6 +259,9 @@
         <topic>model/eddiebot/joint_states</topic>
       </plugin>
     </gazebo>
+
+    <xacro:ultrasonic_sensor_sim name="ultrasonic_l" parent="base_link" topic="ultrasonic_l" x="0.2" y="0.08" z="0.028" roll="0.000" pitch="0.000" yaw="20" linkname="ultrasonic_link_l" jointname="ultrasonic_joint_l"/>
+    <xacro:ultrasonic_sensor_sim name="ultrasonic_r" parent="base_link" topic="ultrasonic_r" x="0.2" y="-0.08" z="0.028" roll="0.000" pitch="0.000" yaw="-20" linkname="ultrasonic_link_r" jointname="ultrasonic_joint_r"/>
 
   </xacro:macro>
 

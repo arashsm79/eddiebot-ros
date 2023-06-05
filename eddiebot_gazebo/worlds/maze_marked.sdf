@@ -9,6 +9,7 @@
     <plugin name='ignition::gazebo::systems::UserCommands' filename='ignition-gazebo-user-commands-system'/>
     <plugin name='ignition::gazebo::systems::SceneBroadcaster' filename='ignition-gazebo-scene-broadcaster-system'/>
     <plugin name='ignition::gazebo::systems::Contact' filename='ignition-gazebo-contact-system'/>
+
     <gravity>0 0 -9.8000000000000007</gravity>
     <magnetic_field>6.0000000000000002e-06 2.3e-05 -4.1999999999999998e-05</magnetic_field>
     <atmosphere type='adiabatic'/>

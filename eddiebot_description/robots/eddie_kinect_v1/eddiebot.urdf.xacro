@@ -5,6 +5,8 @@
   <xacro:include filename="$(find eddiebot_description)/urdf/stacks/circle_stack.urdf.xacro"/>
   <xacro:include filename="$(find eddiebot_description)/urdf/stacks/camera_stand.urdf.xacro"/>
   <xacro:include filename="$(find eddiebot_description)/urdf/sensors/kinect_v1.urdf.xacro"/>
+  <!-- smh   -->
+  <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ultrasonic_sensor.urdf.xacro"/>
 
   <!-- eddiebot -->
   <xacro:create_base/>
