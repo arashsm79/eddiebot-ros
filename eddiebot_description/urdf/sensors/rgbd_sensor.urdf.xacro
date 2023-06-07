@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 <robot name="rgbd_sensor" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:property name="rgbd_fov" value="${60.0*M_PI/180.0}"/>
+    <xacro:property name="rgbd_width" value="640"/>
+    <xacro:property name="rgbd_height" value="480"/>
   <!-- Microsoft Kinect for simulation -->
     <xacro:macro name="rgbd_sensor_sim">
         <gazebo>
@@ -10,16 +13,22 @@
         <gazebo reference="camera_link">
             <sensor name="camera" type="rgbd_camera">
                 <camera>
-                    <horizontal_fov>${60.0*M_PI/180.0}</horizontal_fov>
+                    <horizontal_fov>${rgbd_fov}</horizontal_fov>
                     <image>
-                        <width>640</width>
-                        <height>480</height>
+                        <width>${rgbd_width}</width>
+                        <height>${rgbd_height}</height>
                         <format>RGB_INT8</format>
                     </image>
                     <clip>
                         <near>0.05</near>
                         <far>12.0</far>
                     </clip>
+                    <depth_camera>
+                        <clip>
+                            <near>0.05</near>
+                            <far>12.0</far>
+                        </clip>
+                    </depth_camera>
                     <distortion>
                         <k1>0.0</k1>
                         <k2>0.0</k2>
@@ -30,10 +39,13 @@
                     </distortion>
                     <lens>
                         <intrinsics>
-                            <fx>554.25469</fx>
-                            <fy>554.25469</fy>
-                            <cx>320.5</cx>
-                            <cy>240.5</cy>
+                            <!-- fx = fy = width / ( 2 * tan (hfov / 2 ) ) -->
+                            <fx>${rgbd_width / 2 * (0.5769)}</fx>
+                            <fy>${rgbd_width / 2 * (0.5769)}</fy>
+                            <!-- cx = ( width + 1 ) / 2 -->
+                            <cx>${(rgbd_width + 1)/2}</cx>
+                            <!-- cy = ( height + 1 ) / 2 -->
+                            <cy>${(rgbd_height + 1)/2}</cy>
                             <s>0</s>
                         </intrinsics>
                     </lens>
@@ -42,12 +54,6 @@
                         <mean>0</mean>
                         <stddev>0.007</stddev>
                     </noise>
-                    <depth_camera>
-                        <clip>
-                            <near>0.05</near>
-                            <far>12.0</far>
-                        </clip>
-                    </depth_camera>
                 </camera>
                 <always_on>1</always_on>
                 <update_rate>5</update_rate>
