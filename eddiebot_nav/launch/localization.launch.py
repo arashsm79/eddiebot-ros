@@ -30,7 +30,7 @@ def generate_launch_description():
     map_arg = DeclareLaunchArgument(
         'map',
         default_value=PathJoinSubstitution(
-            [pkg_eddiebot_nav, 'maps', 'warehouse.yaml']),
+            [pkg_eddiebot_nav, 'maps', 'maze.yaml']),
         description='Full path to map yaml file to load')
 
     namespace = LaunchConfiguration('namespace')

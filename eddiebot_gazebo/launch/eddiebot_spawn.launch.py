@@ -80,7 +80,7 @@ def generate_launch_description():
                 {'range_min': 0.45},
                 {'range_max': 12.0},
                 {'scan_height': 1},
-                {'output_frame': 'camera_depth_frame'},
+                {'output_frame': 'base_link'},
             ],
             remappings=[
                 ('depth_camera_info', '/kinect_rgbd_camera/camera_info'),

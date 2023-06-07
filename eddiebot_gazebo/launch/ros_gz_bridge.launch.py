@@ -54,7 +54,7 @@ def generate_launch_description():
             'use_sim_time': use_sim_time
         }],
         arguments=[
-            ['/cmd_vel' + '@geometry_msgs/msg/Twist' + '[gz.msgs.Twist'],
+            ['/cmd_vel' + '@geometry_msgs/msg/Twist' + '@gz.msgs.Twist'],
         ])
 
     odom_base_tf_bridge = Node(
@@ -70,6 +70,18 @@ def generate_launch_description():
         ],
         remappings=[
             ('/model/eddiebot/tf', '/tf')
+        ])
+
+    odom_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='odom_base_tf_bridge',
+        output='screen',
+        parameters=[{
+            'use_sim_time': use_sim_time
+            }],
+        arguments=[
+            ['/odom' + '@nav_msgs/msg/Odometry' + '[gz.msgs.Odometry']
         ])
 
     rgbd_camera_bridge = Node(
@@ -89,6 +101,7 @@ def generate_launch_description():
     ld = LaunchDescription(ARGUMENTS)
     ld.add_action(jointstate_bridge)
     ld.add_action(odom_base_tf_bridge)
+    ld.add_action(odom_bridge)
     ld.add_action(cmd_vel_bridge)
     ld.add_action(rgbd_camera_bridge)
     return ld
