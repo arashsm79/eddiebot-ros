@@ -3,6 +3,7 @@
 
   <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/>
   <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ultrasonic_sensor.urdf.xacro"/>
+  <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ir_sensor.urdf.xacro"/>
 
   <!-- Define robot constants -->
   <xacro:property name="base_length" value="0.0095"/>
@@ -258,7 +259,11 @@
         <topic>model/eddiebot/joint_states</topic>
       </plugin>
     </gazebo>
-    <xacro:ultrasonic_sensor_sim topic="ultrasonic_1" name="ultrasonic_1" parent="base_link" linkname="ultrasonic_link1" jointname="ultrasonic_joint1" x="0.11" y="0.11" z="0.0275" roll="0" pitch="0" yaw="${M_PI/8}"/>
-    <xacro:ultrasonic_sensor_sim topic="ultrasonic_2" name="ultrasonic_2" parent="base_link" linkname="ultrasonic_link2" jointname="ultrasonic_joint2" x="0.11" y="-0.11" z="0.0275" roll="0" pitch="0" yaw="${-M_PI/8}"/>
+    <xacro:ultrasonic_sensor_sim topic="ultrasonic_1" name="ultrasonic_1" parent="base_link" linkname="ultrasonic_link1" jointname="ultrasonic_joint1" x="0.15" y="0.08" z="0.0275" roll="0" pitch="0" yaw="${M_PI/8}"/>
+    <xacro:ultrasonic_sensor_sim topic="ultrasonic_2" name="ultrasonic_2" parent="base_link" linkname="ultrasonic_link2" jointname="ultrasonic_joint2" x="0.15" y="-0.08" z="0.0275" roll="0" pitch="0" yaw="${-M_PI/8}"/>
+    
+    <xacro:ir_sensor_sim topic="ir_1" name="ir_sensor_1" parent="base_link" linkname="ir_link_1" jointname="ir_joint_1" x="0.12" y="0.15" z="0.0275" roll="0" pitch="0" yaw="0"/>
+    <xacro:ir_sensor_sim topic="ir_2" name="ir_sensor_2" parent="base_link" linkname="ir_link_2" jointname="ir_joint_2" x="0.12" y="-0.15" z="0.0275" roll="0" pitch="0" yaw="0"/>
+    <xacro:ir_sensor_sim topic="ir_3" name="ir_sensor_3" parent="base_link" linkname="ir_link_3" jointname="ir_joint_3" x="0.16" y="0.0" z="0.0275" roll="0" pitch="0" yaw="0"/>
   </xacro:macro>
 </robot>
