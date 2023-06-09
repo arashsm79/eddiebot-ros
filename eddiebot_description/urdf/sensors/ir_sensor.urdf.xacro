@@ -1,25 +1,25 @@
 <?xml version="1.0"?>
-<robot name="ultrasonic_sensor" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="infrared_sensor" xmlns:xacro="http://ros.org/wiki/xacro">
 
     <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/>
 
     <!-- 
         params:
-        1- topic name: name of the gazebo topic for ultrasonic sensor
-        2- sensor name: name of the sensor
-        3- link name: name of the link for ultrasonic sensor, since there are more than one
+        1: topic name: name of the gazebo topic for infrared sensor
+        2: sensor name: name of the sensor
+        3: link name: name of the link for infrared sensor, since there are more than one
             sensors, link name is set as an parameter to prevent the name consistency.
-        4- joint name: name of the joint, to prevent the name consistency same as the link name.
-        5- parent name: name of the paranet, to connect joints between parent and link_name
-        6,11- parameters for specifying the position of sensor on the base link.
+        4: joint name: name of the joint, to prevent the name consistency same as the link name.
+        5: parent name: name of the paranet, to connect joints between parent and link_name
+        6-11: parameters for specifying the position of sensor on the base link.
     -->
-    <xacro:macro name="ultrasonic_sensor" params="topic_name sensor_name link_name joint_name parent x y z roll pitch yaw">
+    <xacro:macro name="infrared_sensor" params="topic_name sensor_name link_name joint_name parent x y z roll pitch yaw">
 
         <!-- 
             there are three main parts, 
-            1- joint: to connect parent link and sensor link
-            2- link: small cuboid to represent the sensor
-            3- gazebo sensor: add gpu_lidar sensor with specified topic 
+            1- joint: to connect parent link and sensor link.
+            2- link: small cuboid to represent the sensor.
+            3- gazebo sensor: add gpu_lidar sensor with specified topic.
             
         -->
         <joint name="${joint_name}" type="fixed">
@@ -30,12 +30,10 @@
 
         <link name="${link_name}">
             <visual>
-                <origin xyz="0 0 0" rpy="${M_PI/2} 0 ${M_PI/2}"/>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
-                    <mesh filename="package://eddiebot_description/meshes/sensors/ultrasonic/ULTRASONICSENSOR.STL" scale="0.001 0.0009 0.0006"/>
+                    <box size="0.01 0.04 0.03"/>
                 </geometry>
-                <material name ="sensor_blue" />
-
             </visual>
             <collision>
                 <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
@@ -68,8 +66,8 @@
                         </horizontal>
                     </scan>
                     <range>
-                        <min>0.08</min>
-                        <max>4</max>
+                        <min>0.1</min>
+                        <max>0.8</max>
                         <resolution>0.02</resolution>
                     </range>
                     <noise>
