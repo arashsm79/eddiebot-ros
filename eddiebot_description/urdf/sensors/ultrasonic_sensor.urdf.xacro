@@ -22,23 +22,51 @@
             3- gazebo sensor: add gpu_lidar sensor with specified topic 
             
         -->
-        <joint name="${joint_name}" type="fixed">
+        <joint name="${joint_name}_1" type="fixed">
             <origin xyz="${x} ${y} ${z}" rpy="${roll} ${pitch} ${yaw}"/>
             <parent link="${parent}"/>
-            <child link="${link_name}"/>
+            <child link="${link_name}_1"/>
         </joint>
 
-        <link name="${link_name}">
+        <link name="${link_name}_1">
             <visual>
-                <origin xyz="0 0 0" rpy="${M_PI/2} 0 ${M_PI/2}"/>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.01 0.01 0.04"/>
+                </geometry>
+                <material name ="material_darkgray" />
+            </visual>
+            <collision>
+                <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.01 0.01 0.04"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="0.1" />
+                <origin xyz="0 0 0" />
+                <inertia ixx="0.003881243" ixy="0.0" ixz="0.0"
+                        iyy="0.000498940" iyz="0.0"
+                        izz="0.003879257" />
+            </inertial>
+        </link>
+        
+        <joint name="${joint_name}_2" type="fixed">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <parent link="${link_name}_1"/>
+            <child link="${link_name}_2"/>
+        </joint>
+        <link name="${link_name}_2">
+            <visual>
+                <origin xyz="0 -0.0225 0.015" rpy="${M_PI/2} 0 ${M_PI/2}"/>
                 <geometry>
                     <mesh filename="package://eddiebot_description/meshes/sensors/ultrasonic_infrared/ULTRASONIC_INFRARED.STL" scale="0.001 0.0009 0.0006"/>
                 </geometry>
                 <material name ="sensor_blue" />
-
             </visual>
+
             <collision>
-                <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+                <origin xyz="0 -0.0225 0.015" rpy="${M_PI/2} 0 ${M_PI/2}"/>
                 <geometry>
                     <box size="0.01 0.04 0.03"/>
                 </geometry>
@@ -52,7 +80,7 @@
             </inertial>
         </link>
 
-        <gazebo reference="${link_name}">
+        <gazebo reference="${link_name}_2">
             <sensor name="${sensor_name}" type='gpu_lidar'>
                 <always_on>1</always_on>
                 <update_rate>5</update_rate>
