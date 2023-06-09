@@ -82,7 +82,14 @@
             </inertial>
         </link>
 
-        <gazebo reference="${link_name}_2">
+        <joint name="${joint_name}_3" type="fixed">
+            <origin xyz="0 0.025 0.02" rpy="0 0 0"/>
+            <parent link="${link_name}_2"/>
+            <child link="${link_name}_3"/>
+        </joint>
+        <link name="${link_name}_3"/>
+        
+        <gazebo reference="${link_name}_3">
             <sensor name="${sensor_name}" type='gpu_lidar'>
                 <always_on>1</always_on>
                 <update_rate>5</update_rate>
