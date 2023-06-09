@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot name="infrared_sensor" xmlns:xacro="http://ros.org/wiki/xacro">
 
-    <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/>
+    <!-- <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/> -->
 
     <!-- 
         params:
@@ -31,10 +31,11 @@
 
         <link name="${link_name}">
             <visual>
-                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <origin xyz="0 0 0" rpy="${M_PI/2} 0 ${M_PI/2}"/>
                 <geometry>
-                    <box size="0.01 0.04 0.03"/>
+                    <mesh filename="package://eddiebot_description/meshes/sensors/ultrasonic/ULTRASONICSENSOR.STL" scale="0.001 0.0009 0.0006"/>
                 </geometry>
+                <material name ="sensor_blue" />
             </visual>
             <collision>
                 <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
