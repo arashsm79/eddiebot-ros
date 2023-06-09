@@ -2,6 +2,7 @@
 <robot name="eddiebot_create_base" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/>
+  <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ultrasonic_sensor.urdf.xacro"/>
 
   <!-- Define robot constants -->
   <xacro:property name="base_length" value="0.0095"/>
@@ -29,7 +30,6 @@
   <xacro:property name="wheel_y_offset" value="0.01905"/>
 
   <xacro:macro name="create_base">
-
     <!-- base_footprint is a fictitious link(frame) that is on the ground right below base_link origin, navigation stack depends on this frame -->
     <link name="base_footprint">
     </link>
@@ -55,6 +55,9 @@
         </geometry>
       </collision>
     </link>
+
+    <xacro:ultrasonic_ping name="ultra1" x="0.18" y="-0.05" z="0.0165" r="0" p="0" ya="-0.2" />
+    <xacro:ultrasonic_ping name="ultra2" x="0.18" y="0.05" z="0.0165" r="0" p="0" ya="0.2" />
 
     <link name="battery_box">
       <xacro:inertial_cuboid mass="1" x="0.1778" y="${battery_box_width}" z="0.0762"/>

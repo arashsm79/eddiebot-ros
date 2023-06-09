@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<robot name="ultrasonic_ping_1" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!-- <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/> -->
+
+    <xacro:macro name="ultrasonic_ping" params="name x y z r p ya">
+            <link name="${name}_link">
+                <xacro:inertial_cuboid mass="0.3" x="0.1778" y="0.18" z="0.0762" />
+                <visual>
+                    <material name="material_darkgray" />
+                    <origin xyz="0 0 0" rpy="0 0 0" />
+                    <geometry>
+                        <box size="0.01 0.04 0.025" />
+                    </geometry>
+                </visual>
+                <collision>
+                  <origin xyz="0 0 0" rpy="0 0 0" />
+                  <geometry>
+                    <box size="0.01 0.04 0.025" />
+                  </geometry>
+                </collision>
+            </link>
+
+            <joint name="${name}_joint" type="fixed">
+              <origin xyz="${x} ${y} ${z}" rpy="${r} ${p} ${ya}" />
+              <parent link="base_link" />
+              <child link="${name}_link" />
+            </joint>
+        <gazebo>
+            <sensor name='${name}' type='gpu_lidar'>
+
+                <always_on>1</always_on>
+                <update_rate>5</update_rate>
+                <visualize>1</visualize>
+                <topic>ultrasonic_1</topic>
+                <ray>
+                    <scan>
+                        <horizontal>
+                            <samples>1</samples>
+                            <resolution>1</resolution>
+                            <min_angle>0</min_angle>
+                            <max_angle>0</max_angle>
+                        </horizontal>
+                    </scan>
+                    <range>
+                        <min>0.08</min>
+                        <max>4</max>
+                        <resolution>0.02</resolution>
+                    </range>
+                    <noise>
+                        <type>gaussian</type>
+                        <mean>0.1</mean>
+                        <stddev>0.005</stddev>
+                    </noise>
+                </ray>
+                <plugin filename="libgazebo_ros_range.so" name="gazebo_ros_range">
+                    <gaussianNoise>0.005</gaussianNoise>
+                    <alwaysOn>true</alwaysOn>
+                    <updateRate>5</updateRate>
+                    <topicName>${name}</topicName>
+                    <frameName>${name}</frameName>
+                    <fov>0.5</fov>
+                    <radiation>ultrasound</radiation>
+                </plugin>
+            </sensor>
+        </gazebo>
+    </xacro:macro>
+</robot>
