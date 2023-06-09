@@ -1,30 +1,44 @@
 <?xml version="1.0"?>
 <robot name="ir_ping" xmlns:xacro="http://ros.org/wiki/xacro">
-
+    <!-- in this file we have the desctibtion of IR sensor which uses light to
+    measure and recognize the distances such as measuring the distance which the
+    robot is away from the wall or trying not to hit walls or any other objects
+    we have 6 main parameters which will be passed when an instance is being created.
+    name which is the name of the ir sensor, x which is the distance on the axis of x which
+    the robot is away from the `base_link`, y and z are the same. r is the roll rotation, 
+    p is the pitch rotation and ya is the yaw rotation-->
 
     <xacro:macro name="ir_ping" params="name x y z r p ya">
-            <link name="${name}_link">
-                <xacro:inertial_cuboid mass="0.3" x="0.1778" y="0.18" z="0.0762" />
-                <visual>
-                    <material name="material_darkgray" />
-                    <origin xyz="0 0 0" rpy="0 0 0" />
-                    <geometry>
-                        <box size="0.01 0.02 0.04" />
-                    </geometry>
-                </visual>
-                <collision>
-                  <origin xyz="0 0 0" rpy="0 0 0" />
-                  <geometry>
-                    <box size="0.01 0.02 0.04" />
-                  </geometry>
-                </collision>
-            </link>
 
-            <joint name="${name}_joint" type="fixed">
-              <origin xyz="${x} ${y} ${z}" rpy="${r} ${p} ${ya}" />
-              <parent link="base_link" />
-              <child link="${name}_link" />
-            </joint>
+        <!-- Link of the ir sensor. the difference between the ultrasonic sensor
+        is that this sensor is narrower than the physical form of ultrasonic sensors-->
+        <link name="${name}_link">
+            <xacro:inertial_cuboid mass="0.3" x="0.1778" y="0.18" z="0.0762" />
+            <visual>
+                <material name="material_darkgray" />
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="0.01 0.02 0.04" />
+                </geometry>
+            </visual>
+            <collision>
+              <origin xyz="0 0 0" rpy="0 0 0" />
+              <geometry>
+                <box size="0.01 0.02 0.04" />
+              </geometry>
+            </collision>
+        </link>
+
+        <!-- We need joint for describtion of our sensor which is obvious in the 
+        follow -->
+        <joint name="${name}_joint" type="fixed">
+          <origin xyz="${x} ${y} ${z}" rpy="${r} ${p} ${ya}" />
+          <parent link="base_link" />
+          <child link="${name}_link" />
+        </joint>
+
+        <!-- here we describe the sensor. its name, sample rates, the topic it 
+        poblishes the informations to, resolution and etc. -->
         <gazebo reference="${name}_link">
             <sensor name='${name}' type='gpu_lidar'>
 
