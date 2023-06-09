@@ -252,7 +252,7 @@
         <topic>cmd_vel</topic>
         <frame_id>odom</frame_id>
         <child_frame_id>base_footprint</child_frame_id>
-        <odom_topic>/odom</odom_topic>
+        <odom_topic>wheel_odom</odom_topic>
       </plugin>
       <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
         <joint_name>left_wheel_joint</joint_name>

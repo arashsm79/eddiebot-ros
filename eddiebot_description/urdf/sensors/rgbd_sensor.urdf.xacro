@@ -48,6 +48,14 @@
                             <cy>${(rgbd_height + 1)/2}</cy>
                             <s>0</s>
                         </intrinsics>
+                        <projection>
+                            <p_fx>${rgbd_width / 2 * (0.5769)}</p_fx>
+                            <p_fy>${rgbd_width / 2 * (0.5769)}</p_fy>
+                            <p_cx>${(rgbd_width + 1)/2}</p_cx>
+                            <p_cy>${(rgbd_height + 1)/2}</p_cy>
+                            <tx>0</tx>
+                            <ty>0</ty>
+                        </projection>
                     </lens>
                     <noise>
                         <type>gaussian</type>

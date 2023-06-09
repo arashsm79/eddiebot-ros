@@ -70,21 +70,29 @@ def generate_launch_description():
 
         # Use RGBD sensor as a LIDAR
         Node(
-            package='depthimage_to_laserscan',
-            executable='depthimage_to_laserscan_node',
-            name='depthimage_to_laserscan',
+            package='pointcloud_to_laserscan',
+            executable='pointcloud_to_laserscan_node',
+            name='pointcloud_to_laserscan',
             output='screen',
             parameters=[
                 {'use_sim_time': LaunchConfiguration('use_sim_time')},
-                {'scan_time': 0.033},
-                {'range_min': 0.45},
+                {'scan_time': 0.333},
+                {'range_min': 0.10},
                 {'range_max': 12.0},
-                {'scan_height': 1},
-                {'output_frame': 'base_link'},
             ],
             remappings=[
-                ('depth_camera_info', '/kinect_rgbd_camera/camera_info'),
-                ('depth', '/kinect_rgbd_camera/depth_image')
+                ('cloud_in', '/kinect_rgbd_camera/points'),
+            ]
+        ),
+        # TODO: remove this once https://github.com/gazebosim/gz-sensors/pull/350 is in the repos
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='static_transform_publisher',
+            arguments=[
+                '--x', '0', '--y', '0', '--z', '0',
+                '--qx', '0', '--qy', '0', '--qz', '0', '--qw', '1',
+                '--frame-id', 'camera_link', '--child-frame-id', 'eddiebot/base_footprint/camera'
             ]
         ),
 

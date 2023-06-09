@@ -13,7 +13,9 @@ ARGUMENTS = [
                           choices=['true', 'false'],
                           description='Use sim time'),
     DeclareLaunchArgument('namespace', default_value='',
-                          description='Robot namespace')
+                          description='Robot namespace'),
+    DeclareLaunchArgument('world', default_value='empty',
+                          description='Generated World'),
 ]
 
 
@@ -30,7 +32,7 @@ def generate_launch_description():
     map_arg = DeclareLaunchArgument(
         'map',
         default_value=PathJoinSubstitution(
-            [pkg_eddiebot_nav, 'maps', 'maze.yaml']),
+            [pkg_eddiebot_nav, 'maps', LaunchConfiguration('world')]),
         description='Full path to map yaml file to load')
 
     namespace = LaunchConfiguration('namespace')

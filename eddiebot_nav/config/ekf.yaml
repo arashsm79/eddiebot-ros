@@ -1,0 +1,37 @@
+ekf_filter_node:
+    ros__parameters:
+
+        use_sim_time: true
+        frequency: 10.0
+        sensor_timeout: 0.2
+        two_d_mode: true
+        transform_time_offset: 0.0
+        transform_timeout: 0.0
+        publish_tf: true
+
+        map_frame: map                   # Defaults to "map" if unspecified
+        odom_frame: odom                 # Defaults to "odom" if unspecified
+        base_link_frame: base_footprint  # Defaults to "base_link" if unspecified
+        world_frame: odom                # Defaults to the value of odom_frame if unspecified
+
+        odom0: wheel_odom
+        #        [x_pos   , y_pos    , z_pos,
+        #         roll    , pitch    , yaw,
+        #         x_vel   , y_vel    , z_vel,
+        #         roll_vel, pitch_vel, yaw_vel,
+        #         x_accel , y_accel  , z_accel]
+        odom0_config: [true, true, true,
+                       false, false, true,
+                       true,  false,  false,
+                       false, false, false,
+                       false, false, false]
+        odom0_differential: false
+
+        odom1: vis_odom
+        odom1_config: [true, true, false,
+                      false,  false,  true,
+                      true, false, false,
+                      false,  false,  false,
+                      false,  false,  false]
+        odom1_differential: true
+
