@@ -21,7 +21,9 @@
                 2- first link: sensor stand
                 3- second joint: connect sensor link to the stand link
                 4- second link: sensor (using sensor STL file)
-                5- gazebo sensor: add gpu_lidar sensor with specified topic 
+                5- third joint: using to correct the direction of the sensor's ray
+                6- third link: dummy link
+                7- gazebo sensor: add gpu_lidar sensor with specified topic 
         -->
         
         <joint name="${joint_name}_1" type="fixed">
@@ -81,6 +83,8 @@
                         izz="0.003879257" />
             </inertial>
         </link>
+
+        <!-- the third joint and link are for correcting the ray direction -->
 
         <joint name="${joint_name}_3" type="fixed">
             <origin xyz="0 0.025 0.02" rpy="0 0 0"/>
