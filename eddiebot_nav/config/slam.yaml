@@ -23,14 +23,14 @@ slam_toolbox:
     resolution: 0.05
     max_laser_range: 12.0
     minimum_time_interval: 0.5
-    transform_timeout: 0.3
+    transform_timeout: 1.3
     tf_buffer_duration: 30.
     stack_size_to_use: 40000000 #// program needs a larger stack size to serialize large maps
     enable_interactive_mode: true
 
     # General Parameters
-    use_scan_matching: true
-    use_scan_barycenter: true
+    use_scan_matching: false
+    use_scan_barycenter: false
     minimum_travel_distance: 0.5
     minimum_travel_heading: 0.5
     scan_buffer_size: 20
