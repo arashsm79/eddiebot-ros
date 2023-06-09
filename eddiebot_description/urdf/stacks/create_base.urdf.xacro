@@ -2,6 +2,8 @@
 <robot name="eddiebot_create_base" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/>
+  <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ultrasonic_sensor.urdf.xacro"/>
+  
 
   <!-- Define robot constants -->
   <xacro:property name="base_length" value="0.0095"/>
@@ -84,6 +86,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="-${M_PI/2} 0 ${M_PI/2}" />
         <geometry>
+
           <mesh filename="package://eddiebot_description/meshes/28971-Caster-Wheel-Kit-v1.0.stl"/>
         </geometry>
         <material name ="material_lightgray">
@@ -257,7 +260,14 @@
         <topic>model/eddiebot/joint_states</topic>
       </plugin>
     </gazebo>
+  <!-- <xacro:ultrasonic_sensor params="base_link ultrasonic1 ultrasonic1_topic"/>
+  <xacro:ultrasonic_sensor params="base_link ultrasonic2 ultrasonic2_topic"/> -->
 
+  <!-- <xacro:ultrasonic_sensor parent="base_link" sensor_name="ultrasonic1" topic_name="ultrasonic1_topic" jointname="ultrasonic1_joint" linkname="ultrasonic1_link" x="0.18" y="0.1" z="0.02" roll="${M_PI/2}" pitch="0" yaw="${M_PI/2+M_PI/8}"/>
+  <xacro:ultrasonic_sensor parent="base_link" sensor_name="ultrasonic2" topic_name="ultrasonic2_topic" jointname="ultrasonic2_joint" linkname="ultrasonic2_link" x="0.18" y="-0.1" z="0.02" roll="${M_PI/2}" pitch="0" yaw="${M_PI/2-M_PI/8}"/> -->
+
+  <xacro:ultrasonic_sensor parent="base_link" sensor_name="ultrasonic1" topic_name="ultrasonic1_topic" jointname="ultrasonic1_joint" linkname="ultrasonic1_link" x="0.18" y="0.1" z="0.02" roll="0" pitch="0" yaw="${M_PI/7}"/>
+  <xacro:ultrasonic_sensor parent="base_link" sensor_name="ultrasonic2" topic_name="ultrasonic2_topic" jointname="ultrasonic2_joint" linkname="ultrasonic2_link" x="0.18" y="-0.1" z="0.02" roll="0" pitch="0" yaw="${-M_PI/7}"/>
   </xacro:macro>
 
 </robot>
