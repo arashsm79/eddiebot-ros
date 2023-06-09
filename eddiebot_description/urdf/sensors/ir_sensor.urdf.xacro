@@ -1,22 +1,21 @@
 <?xml version="1.0"?>
-<robot name="ultrasonic_ping_1" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="ir_ping" xmlns:xacro="http://ros.org/wiki/xacro">
 
-    <!-- <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/> -->
 
-    <xacro:macro name="ultrasonic_ping" params="name x y z r p ya">
+    <xacro:macro name="ir_ping" params="name x y z r p ya">
             <link name="${name}_link">
                 <xacro:inertial_cuboid mass="0.3" x="0.1778" y="0.18" z="0.0762" />
                 <visual>
                     <material name="material_darkgray" />
                     <origin xyz="0 0 0" rpy="0 0 0" />
                     <geometry>
-                        <box size="0.01 0.04 0.025" />
+                        <box size="0.01 0.02 0.04" />
                     </geometry>
                 </visual>
                 <collision>
                   <origin xyz="0 0 0" rpy="0 0 0" />
                   <geometry>
-                    <box size="0.01 0.04 0.025" />
+                    <box size="0.01 0.02 0.04" />
                   </geometry>
                 </collision>
             </link>

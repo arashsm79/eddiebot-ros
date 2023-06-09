@@ -3,6 +3,8 @@
 
   <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/>
   <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ultrasonic_sensor.urdf.xacro"/>
+  <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ir_sensor.urdf.xacro"/>
+
 
   <!-- Define robot constants -->
   <xacro:property name="base_length" value="0.0095"/>
@@ -56,8 +58,12 @@
       </collision>
     </link>
 
-    <xacro:ultrasonic_ping name="ultra1" x="0.18" y="-0.05" z="0.0165" r="0" p="0" ya="-0.2" />
-    <xacro:ultrasonic_ping name="ultra2" x="0.18" y="0.05" z="0.0165" r="0" p="0" ya="0.2" />
+    <xacro:ultrasonic_ping name="ultra_r" x="0.18" y="-0.07" z="0.0165" r="0" p="0" ya="-0.2" />
+    <xacro:ultrasonic_ping name="ultra_l" x="0.18" y="0.07" z="0.0165" r="0" p="0" ya="0.2" />
+
+    <xacro:ir_ping name="ir_r" x="0.15" y="-0.12" z="0.025" r="0" p="0" ya="-0.6" />
+    <xacro:ir_ping name="ir_l" x="0.15" y="0.12" z="0.025" r="0" p="0" ya="0.6" />
+    <xacro:ir_ping name="ir_c" x="0.187" y="0" z="0.025" r="0" p="0" ya="0" />
 
     <link name="battery_box">
       <xacro:inertial_cuboid mass="1" x="0.1778" y="${battery_box_width}" z="0.0762"/>
