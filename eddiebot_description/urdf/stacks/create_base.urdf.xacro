@@ -3,6 +3,7 @@
 
   <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/>
   <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ultrasonic_sensor.urdf.xacro"/>
+  <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ir_sensor.urdf.xacro"/>
   
 
   <!-- Define robot constants -->
@@ -268,6 +269,14 @@
 
   <xacro:ultrasonic_sensor parent="base_link" sensor_name="ultrasonic1" topic_name="ultrasonic1_topic" jointname="ultrasonic1_joint" linkname="ultrasonic1_link" x="0.18" y="0.1" z="0.02" roll="0" pitch="0" yaw="${M_PI/7}"/>
   <xacro:ultrasonic_sensor parent="base_link" sensor_name="ultrasonic2" topic_name="ultrasonic2_topic" jointname="ultrasonic2_joint" linkname="ultrasonic2_link" x="0.18" y="-0.1" z="0.02" roll="0" pitch="0" yaw="${-M_PI/7}"/>
+
+  <!-- IR sensors -->
+  <xacro:ir_sensor parent="base_link" sensor_name="ir_sensor1" topic_name="ir_sensor1_topic" jointname="ir_sensor1_joint" linkname="ir_sensor1_link" x="0.21" y="0" z="0.02" roll="0" pitch="0" yaw="0"/>
+  <xacro:ir_sensor parent="base_link" sensor_name="ir_sensor2" topic_name="ir_sensor2_topic" jointname="ir_sensor2_joint" linkname="ir_sensor2_link" x="0.1" y="0.18" z="0.02" roll="0" pitch="0" yaw="${M_PI/3}"/>
+  <xacro:ir_sensor parent="base_link" sensor_name="ir_sensor3" topic_name="ir_sensor3_topic" jointname="ir_sensor3_joint" linkname="ir_sensor3_link" x="0.1" y="-0.18" z="0.02" roll="0" pitch="0" yaw="${-M_PI/3}"/>
+
+
+
   </xacro:macro>
 
 </robot>

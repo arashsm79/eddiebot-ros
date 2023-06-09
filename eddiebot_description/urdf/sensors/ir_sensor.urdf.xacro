@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<robot name="ir_sensor" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Microsoft Kinect for simulation -->
+    <xacro:macro name="ir_sensor" params="parent sensor_name topic_name jointname linkname x y z roll pitch yaw">
+        
+
+        <joint name="${jointname}" type="fixed">
+                <origin xyz="${x} ${y} ${z}" rpy="${roll} ${pitch} ${yaw}"/>
+                <parent link="${parent}"/>
+                <child link="${linkname}"/>
+        </joint>
+
+        <link name="${linkname}">
+            <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+                <geometry>
+                <box size="0.03271 0.05794 0.033"/>
+                </geometry>
+            </visual>
+            <collision>
+                <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+                <geometry>
+                <box size="0.03271 0.05794 0.033"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="0.1"/>
+                <origin xyz="0 0 0" />
+                <inertia ixx="0.003881243" ixy="0.0" ixz="0.0"
+                        iyy="0.000498940" iyz="0.0"
+                        izz="0.003879257" />
+            </inertial>
+        </link>
+
+        <gazebo reference="${linkname}">
+            <sensor name="${sensor_name}" type='gpu_lidar'>"
+                <always_on>1</always_on>
+                <update_rate>5</update_rate>
+                <visualize>1</visualize>
+                <topic>${topic_name}</topic>
+                <ray>
+                    <scan>
+                        <horizontal>
+                            <samples>1</samples>
+                            <resolution>1</resolution>
+                            <min_angle>0</min_angle>
+                            <max_angle>0</max_angle>
+                        </horizontal>
+                    </scan>
+                    <range>
+                        <min>0.1</min>
+                        <max>0.8</max>
+                        <resolution>0.02</resolution>
+                    </range>
+                    <noise>
+                        <type>gaussian</type>
+                        <mean>0.1</mean>
+                        <stddev>0.005</stddev>
+                    </noise>
+                </ray>
+            </sensor>
+        </gazebo>
+    </xacro:macro>
+</robot>
