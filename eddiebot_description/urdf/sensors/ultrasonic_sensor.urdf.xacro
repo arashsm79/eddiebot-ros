@@ -1,15 +1,27 @@
 <?xml version="1.0"?>
 <robot name="ultrasonic_sensor" xmlns:xacro="http://ros.org/wiki/xacro">
-    <!-- <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ultrasonic_sensor.urdf.xacro"/> -->
+
     <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/>
 
+    <!-- 
+        params:
+        1- topic name: name of the gazebo topic for ultrasonic sensor
+        2- sensor name: name of the sensor
+        3- link name: name of the link for ultrasonic sensor, since there are more than one
+            sensors, link name is set as an parameter to prevent the name consistency.
+        4- joint name: name of the joint, to prevent the name consistency same as the link name.
+        5- parent name: name of the paranet, to connect joints between parent and link_name
+        6,11- parameters for specifying the position of sensor on the base link.
+    -->
     <xacro:macro name="ultrasonic_sensor" params="topic_name sensor_name link_name joint_name parent x y z roll pitch yaw">
-        <!-- <gazebo>
-            <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
-                <render_engine>ogre2</render_engine>
-            </plugin>
-        </gazebo> -->
 
+        <!-- 
+            there are three main parts, 
+            1- joint: to connect parent link and sensor link
+            2- link: small cuboid to represent the sensor
+            3- gazebo sensor: add gpu_lidar sensor with specified topic 
+            
+        -->
         <joint name="${joint_name}" type="fixed">
             <origin xyz="${x} ${y} ${z}" rpy="${roll} ${pitch} ${yaw}"/>
             <parent link="${parent}"/>
