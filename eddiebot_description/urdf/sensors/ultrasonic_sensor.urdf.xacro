@@ -53,13 +53,13 @@
         </link>
         
         <joint name="${joint_name}_2" type="fixed">
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0 -0.0225 0.015" rpy="${M_PI/2} 0 ${M_PI/2}"/>
             <parent link="${link_name}_1"/>
             <child link="${link_name}_2"/>
         </joint>
         <link name="${link_name}_2">
             <visual>
-                <origin xyz="0 -0.0225 0.015" rpy="${M_PI/2} 0 ${M_PI/2}"/>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
                     <mesh filename="package://eddiebot_description/meshes/sensors/ultrasonic_infrared/ULTRASONIC_INFRARED.STL" scale="0.001 0.0009 0.0006"/>
                 </geometry>
@@ -67,7 +67,7 @@
             </visual>
 
             <collision>
-                <origin xyz="0 -0.0225 0.015" rpy="${M_PI/2} 0 ${M_PI/2}"/>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
                     <box size="0.01 0.04 0.03"/>
                 </geometry>
