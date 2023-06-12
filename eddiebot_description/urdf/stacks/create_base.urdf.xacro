@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <robot name="eddiebot_create_base" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/>
+  <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ultrasonic_sensor.urdf.xacro"/>
+  <xacro:include filename="$(find eddiebot_description)/urdf/sensors/ir_sensor.urdf.xacro"/>
 
   <!-- Define robot constants -->
   <xacro:property name="base_length" value="0.0095"/>
@@ -260,6 +261,17 @@
         <topic>model/eddiebot/joint_states</topic>
       </plugin>
     </gazebo>
+
+
+    <!-- create two instances of the ultrasonic sensor -->
+    <xacro:ultrasonic_sensor topic_name="ultrasonic1" sensor_name="usen1" link_name="ul1" joint_name='uj1' parent="base_link" x="0.195" y="0.09" z="0.015" roll="0" pitch="0" yaw="${M_PI/8}"/>
+    <xacro:ultrasonic_sensor topic_name="ultrasonic2" sensor_name="usen2" link_name="ul2" joint_name='uj2' parent="base_link" x="0.195" y="-0.09" z="0.015" roll="0" pitch="0" yaw="${-M_PI/8}"/>
+    
+    <!-- create three instances of the infrared sensor -->
+    <xacro:infrared_sensor topic_name="infrared1" sensor_name="isen1" link_name="il1" joint_name='ij1' parent="base_link" x="0.135" y="-0.155" z="0.025" roll="0" pitch="0" yaw="${-M_PI/4}"/>
+    <xacro:infrared_sensor topic_name="infrared2" sensor_name="isen2" link_name="il2" joint_name='ij2' parent="base_link" x="0.210" y="0.00" z="0.025" roll="0" pitch="0" yaw="0"/>
+    <xacro:infrared_sensor topic_name="infrared3" sensor_name="isen3" link_name="il3" joint_name='ij3' parent="base_link" x="0.135" y="0.155" z="0.025" roll="0" pitch="0" yaw="${M_PI/4}"/>
+
 
   </xacro:macro>
 

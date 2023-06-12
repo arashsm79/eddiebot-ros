@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<robot name="ultrasonic_sensor" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find eddiebot_description)/urdf/common.urdf.xacro"/>
+
+    <!-- 
+        params:
+        1- topic name: name of the gazebo topic for ultrasonic sensor
+        2- sensor name: name of the sensor
+        3- link name: name of the link for ultrasonic sensor, since there are more than one
+            sensors, link name is set as an parameter to prevent the name consistency.
+        4- joint name: name of the joint, to prevent the name consistency same as the link name.
+        5- parent name: name of the paranet, to connect joints between parent and link_name
+        6,11- parameters for specifying the position of sensor on the base link.
+    -->
+    <xacro:macro name="ultrasonic_sensor" params="topic_name sensor_name link_name joint_name parent x y z roll pitch yaw">
+
+        <!-- 
+            <- main parts ->
+                1- first joint: to connect parent link and sensor stand link
+                2- first link: sensor stand
+                3- second joint: connect sensor link to the stand link
+                4- second link: sensor (using sensor STL file)
+                5- third joint: using to correct the direction of the sensor's ray
+                6- third link: dummy link
+                7- gazebo sensor: add gpu_lidar sensor with specified topic 
+        -->
+        <joint name="${joint_name}_1" type="fixed">
+            <origin xyz="${x} ${y} ${z}" rpy="${roll} ${pitch} ${yaw}"/>
+            <parent link="${parent}"/>
+            <child link="${link_name}_1"/>
+        </joint>
+
+        <link name="${link_name}_1">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.01 0.01 0.04"/>
+                </geometry>
+                <material name ="material_darkgray" />
+            </visual>
+            <collision>
+                <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.01 0.01 0.04"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="0.1" />
+                <origin xyz="0 0 0" />
+                <inertia ixx="0.003881243" ixy="0.0" ixz="0.0"
+                        iyy="0.000498940" iyz="0.0"
+                        izz="0.003879257" />
+            </inertial>
+        </link>
+        
+        <joint name="${joint_name}_2" type="fixed">
+            <origin xyz="0 -0.0225 0.015" rpy="0 0 0"/>
+            <parent link="${link_name}_1"/>
+            <child link="${link_name}_2"/>
+        </joint>
+        <link name="${link_name}_2">
+            <visual>
+                <origin xyz="0 0 0" rpy="${M_PI/2} 0 ${M_PI/2}"/>
+                <geometry>
+                    <mesh filename="package://eddiebot_description/meshes/sensors/ultrasonic_infrared/ULTRASONIC_INFRARED.STL" scale="0.001 0.0009 0.0006"/>
+                </geometry>
+                <material name ="sensor_blue" />
+            </visual>
+
+            <collision>
+                <origin xyz="0 0 0" rpy="${M_PI/2} 0 ${M_PI/2}"/>
+                <geometry>
+                    <box size="0.01 0.04 0.03"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="0.1" />
+                <origin xyz="0 0 0" />
+                <inertia ixx="0.003881243" ixy="0.0" ixz="0.0"
+                        iyy="0.000498940" iyz="0.0"
+                        izz="0.003879257" />
+            </inertial>
+        </link>
+        
+        <!-- the third joint and link are for correcting the ray direction -->
+        <joint name="${joint_name}_3" type="fixed">
+            <origin xyz="0 0.025 0.02" rpy="0 0 0"/>
+            <parent link="${link_name}_2"/>
+            <child link="${link_name}_3"/>
+        </joint>
+
+        <link name="${link_name}_3"/>
+        
+        <gazebo reference="${link_name}_3">
+            <sensor name="${sensor_name}" type='gpu_lidar'>
+                <always_on>1</always_on>
+                <update_rate>5</update_rate>
+                <visualize>1</visualize>
+                <topic>${topic_name}</topic>
+                <ray>
+                    <scan>
+                        <horizontal>
+                            <samples>1</samples>
+                            <resolution>1</resolution>
+                            <min_angle>0</min_angle>
+                            <max_angle>0</max_angle>
+                        </horizontal>
+                    </scan>
+                    <range>
+                        <min>0.08</min>
+                        <max>4</max>
+                        <resolution>0.02</resolution>
+                    </range>
+                    <noise>
+                        <type>gaussian</type>
+                        <mean>0.1</mean>
+                        <stddev>0.005</stddev>
+                    </noise>
+                </ray>
+            </sensor>
+        </gazebo>
+
+    </xacro:macro>
+</robot>
