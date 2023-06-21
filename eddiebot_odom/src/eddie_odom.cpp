@@ -19,6 +19,8 @@ EddieOdomPublisher::EddieOdomPublisher(std::shared_ptr<rclcpp::Node> node_handle
     
     prev_left_encoder_cnt_ = prev_right_encoder_cnt_ = 0;
 
+    odom_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(nh_);
+
     current_time_ = last_time_ = nh_->get_clock()->now();
 }
 
@@ -51,6 +53,8 @@ void EddieOdomPublisher::encoder_cb_(const eddiebot_msgs::msg::Encoders::ConstSh
     prev_left_encoder_cnt_ = msg->left;
     prev_right_encoder_cnt_ = msg->right;
     last_time_ = current_time_;
+    RCLCPP_DEBUG(nh_->get_logger(),
+                 "got x = %lf, y = %lf, th = %lf, dt = %lf\n", delta_x, delta_y, delta_th, dt);
 
     publish_odom_(delta_x, delta_y, delta_th, dt);
 }

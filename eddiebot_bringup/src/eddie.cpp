@@ -173,7 +173,7 @@ std::string Eddie::command(std::string str) {
                                          // it's good to guarantee
 
   RCLCPP_INFO(node_handle_->get_logger(),
-               "Sending command %s to eddie.", str.c_str());
+               "%s command sent to eddie.", str.c_str());
   _written = write(tty_fd, command, size);
   while (read(tty_fd, &c, 1) <= 0) {
     usleep(1000);
@@ -501,7 +501,7 @@ int main(int argc, char **argv) {
   while (rclcpp::ok()) {
     // eddie.publishPingData();
     // eddie.publishADCData();
-    // eddie.publishEncodersData();
+    eddie.publishEncodersData();
 
     rclcpp::spin_some(node_handle);
     loop_rate.sleep();

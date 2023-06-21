@@ -55,6 +55,16 @@ def generate_launch_description():
              arguments=['-d', rviz2_config],
              parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],
              output='screen'),
+
+        TimerAction(
+            period=1.0,
+            actions=[
+                IncludeLaunchDescription(
+                    PythonLaunchDescriptionSource([description_launch]),
+                    launch_arguments=[('model', LaunchConfiguration('model')),
+                                      ('use_sim_time', LaunchConfiguration('use_sim_time'))],
+                    condition=IfCondition(LaunchConfiguration('description'))
+                )])
     ])
 
     ld = LaunchDescription(ARGUMENTS)

@@ -14,7 +14,7 @@
 #define PI      3.14159265359
 #define TWOPI   (PI * 2)
 // encoder counter per revolution
-#define COUNTS_PER_REVOLUTION   144
+#define COUNTS_PER_REVOLUTION   36
 // Wheel Radius
 #define WHEEL_RADIUS    0.1524
 // the distance of a wheel move forward when encoder increased by 1
