@@ -56,6 +56,17 @@
 #include "eddiebot_msgs/srv/rotate.hpp"
 #include "eddiebot_msgs/srv/stop_at_distance.hpp"
 
+#define PI      3.14159265359
+#define TWOPI   (PI * 2)
+// encoder counter per revolution
+#define COUNTS_PER_REVOLUTION   36
+// Wheel radius in meters
+#define WHEEL_RADIUS    0.1524
+// the distance of a wheel move forward when encoder increased by 1
+#define DISTANCE_PER_COUNT      ((PI * WHEEL_RADIUS) / COUNTS_PER_REVOLUTION)
+// two wheels center-to-center distance
+#define WHEEL_BASE      0.39
+
 class EddieController {
 public:
     EddieController(std::shared_ptr<rclcpp::Node>);

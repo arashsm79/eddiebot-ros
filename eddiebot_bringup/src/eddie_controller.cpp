@@ -329,6 +329,7 @@ void EddieController::drive(int8_t left, int8_t right) {
     if ((now.seconds() - last_cmd_time_.seconds()) >= 0.1) {
       previous_power = current_power_;
       updateCurrentPower(left, right);
+      RCLCPP_INFO(node_handle_->get_logger(), "prev: %hhd, curr: %hhd, left: %d, right: %d", previous_power, current_power_, left, right);
 
       if (abs(left) < abs(right)) {
         power_req->left = current_power_;
@@ -357,6 +358,7 @@ void EddieController::drive(int8_t left, int8_t right) {
         current_power_ = previous_power;
       }
 
+      // continue increasing/decreasing the current_power until it matches one of the desired wheel powers.
       if (left != current_power_ && right != current_power_)
         shift = true;
       else
@@ -381,10 +383,8 @@ void EddieController::rotate(int16_t angular) {
   sem_post(&mutex_interrupt_);
 
   // angular = 0.75 * angular;
-  auto power_req =
-      std::make_shared<eddiebot_msgs::srv::DriveWithPower::Request>();
-  auto heading_req =
-      std::make_shared<eddiebot_msgs::srv::GetHeading::Request>();
+  auto power_req = std::make_shared<eddiebot_msgs::srv::DriveWithPower::Request>();
+  auto heading_req = std::make_shared<eddiebot_msgs::srv::GetHeading::Request>();
   rclcpp::Time now;
 
   bool shift = true, headed = false;
@@ -392,53 +392,25 @@ void EddieController::rotate(int16_t angular) {
   int16_t init_angle = 0, target_angle;
   int8_t left, right, previous_power;
 
-  auto reset_req =
-      std::make_shared<eddiebot_msgs::srv::ResetEncoder::Request>();
-
-  /* TODO: reset encoders if needed
-  while (!eddie_reset_->wait_for_service(1s)) {
-    if (!rclcpp::ok()) {
-      RCLCPP_ERROR(node_handle_->get_logger(),
-                   "Interrupted while waiting for the service. Exiting.");
-      return;
-    }
-    RCLCPP_INFO(node_handle_->get_logger(),
-                "Service not available, waiting again...");
-  }
-  auto result = eddie_reset_->async_send_request(reset_req);
-  if (rclcpp::spin_until_future_complete(node_handle_, result) ==
-      rclcpp::FutureReturnCode::SUCCESS) {
-    RCLCPP_INFO(node_handle_->get_logger(),
-                 "Sent Eddie reset request to service.");
-  } else {
-    RCLCPP_ERROR(node_handle_->get_logger(),
-                 "ERROR: at trying to reset Eddie.");
-  }
-  */
+  auto reset_req = std::make_shared<eddiebot_msgs::srv::ResetEncoder::Request>();
 
   while (!eddie_heading_->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
-      RCLCPP_ERROR(node_handle_->get_logger(),
-                   "Interrupted while waiting for the service. Exiting.");
+      RCLCPP_ERROR(node_handle_->get_logger(), "Interrupted while waiting for the service. Exiting.");
       return;
     }
-    RCLCPP_INFO(node_handle_->get_logger(),
-                "Service not available, waiting again...");
+    RCLCPP_INFO(node_handle_->get_logger(), "Service not available, waiting again...");
   }
   auto future = eddie_heading_->async_send_request(heading_req);
   if (rclcpp::spin_until_future_complete(node_handle_, future) ==
       rclcpp::FutureReturnCode::SUCCESS) {
-    RCLCPP_INFO(node_handle_->get_logger(),
-                 "Sent Eddie heading request to service.");
+    RCLCPP_INFO(node_handle_->get_logger(), "Sent Eddie heading request to service.");
   } else {
-    RCLCPP_ERROR(node_handle_->get_logger(),
-                 "ERROR: at trying to get heading Eddie.");
+    RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: at trying to get heading Eddie.");
   }
 
   if (!future.valid()) {
-    RCLCPP_ERROR(
-        node_handle_->get_logger(),
-        "Unable to get current Heading value. Encoder will now be reseted.");
+    RCLCPP_ERROR(node_handle_->get_logger(), "Unable to get current Heading value. Encoder will now be reseted.");
     sem_post(&mutex_execute_);
     return;
   } else {
@@ -457,21 +429,17 @@ void EddieController::rotate(int16_t angular) {
     if ((now.seconds() - last_cmd_time_.seconds()) >= 0.1) {
       while (!eddie_heading_->wait_for_service(1s)) {
         if (!rclcpp::ok()) {
-          RCLCPP_ERROR(node_handle_->get_logger(),
-                       "Interrupted while waiting for the service. Exiting.");
+          RCLCPP_ERROR(node_handle_->get_logger(), "Interrupted while waiting for the service. Exiting.");
           return;
         }
-        RCLCPP_INFO(node_handle_->get_logger(),
-                    "Service not available, waiting again...");
+        RCLCPP_INFO(node_handle_->get_logger(), "Service not available, waiting again...");
       }
       auto future = eddie_heading_->async_send_request(heading_req);
       if (rclcpp::spin_until_future_complete(node_handle_, future) ==
           rclcpp::FutureReturnCode::SUCCESS) {
-        RCLCPP_INFO(node_handle_->get_logger(),
-                     "Sent Eddie heading request to service.");
+        RCLCPP_INFO(node_handle_->get_logger(), "Sent Eddie heading request to service.");
       } else {
-        RCLCPP_ERROR(node_handle_->get_logger(),
-                     "ERROR: at trying to get heading Eddie.");
+        RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: at trying to get heading Eddie.");
       }
       current_angle_ = future.get()->heading;
       if (current_angle_ > 3736)
@@ -517,22 +485,18 @@ void EddieController::rotate(int16_t angular) {
         power_req->right = angular > 0 ? -1 * current_power_ : current_power_;
         while (!eddie_drive_power_->wait_for_service(1s)) {
           if (!rclcpp::ok()) {
-            RCLCPP_ERROR(node_handle_->get_logger(),
-                         "Interrupted while waiting for the service. Exiting.");
+            RCLCPP_ERROR(node_handle_->get_logger(), "Interrupted while waiting for the service. Exiting.");
             return;
           }
-          RCLCPP_INFO(node_handle_->get_logger(),
-                      "Service not available, waiting again...");
+          RCLCPP_INFO(node_handle_->get_logger(), "Service not available, waiting again...");
         }
         auto result = eddie_drive_power_->async_send_request(power_req);
         if (rclcpp::spin_until_future_complete(node_handle_, result) ==
             rclcpp::FutureReturnCode::SUCCESS) {
-          RCLCPP_INFO(node_handle_->get_logger(),
-                       "Sent Eddie drive power request to service.");
+          RCLCPP_INFO(node_handle_->get_logger(), "Sent Eddie drive power request to service.");
           last_cmd_time_ = node_handle_->get_clock()->now();
         } else {
-          RCLCPP_ERROR(node_handle_->get_logger(),
-                       "ERROR: at trying to drive Eddie.");
+          RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: at trying to drive Eddie.");
           current_power_ = previous_power;
         }
       }
