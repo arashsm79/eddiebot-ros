@@ -63,9 +63,9 @@
 // Wheel radius in meters
 #define WHEEL_RADIUS    0.1524
 // the distance of a wheel move forward when encoder increased by 1
-#define DISTANCE_PER_COUNT      ((PI * WHEEL_RADIUS) / COUNTS_PER_REVOLUTION)
+#define DISTANCE_PER_COUNT      ((TWOPI * WHEEL_RADIUS) / COUNTS_PER_REVOLUTION)
 // two wheels center-to-center distance
-#define WHEEL_BASE      0.39
+#define WHEEL_SEPARATION      0.39
 
 class EddieController {
 public:
@@ -88,36 +88,35 @@ private:
 
     rclcpp::Time last_cmd_time_;
   
-    // Base value for wheel powers. The velocity is multiplied by this value.
-    int base_left_power_, base_right_power_, base_rotation_power_;
-    int acceleration_power_, deceleration_power_, min_power_;
-    int left_speed_, right_speed_, rotation_speed_, acceleration_speed_;
+    int acceleration_rate_, rotation_speed_;
+    int min_velocity_, max_velocity;
     double linear_scale_, angular_scale_;
 
     /*
-      The values for the left and right wheel that are used in drive()
-      The left and right power levels are entered as signed (two’s complement) 8-bit
-      hex values. The range of valid values is 81 (full reverse) to 7F (full forward). A
-      value entered of 80 will be clipped to 81 to maintain symmetry between positive
-      and negative drive power levels.
-      This command sets the motor output PWM ratio, which effectively corresponds to the motor
-      drive power. The range of values (in decimal terms) is -127 to +127, and corresponds to -
-      100% to +100% duty cycle ratio respectively. Note that two’s complement signed 8-bit
-      values typically range from -128 to +127; so to maintain symmetry in the effective drive
-      power, a value of -128 is clipped to be -127.
+      The left and right speeds have units of positions per second and are entered as
+      signed (two’s complement) 16-bit hex values. The range of allowed values is
+      from 8000 to 7FFF.
+      This command sets the drive speed in positions per second. Because it uses
+      encoder/position feedback for each wheel, the controller can automatically regulate drive
+      power to each motor in order to maintain the true desired speed. When setting the desired
+      drive speed, keep in mind that the motors have physical limitations for maximum output
+      power and top speed, so for this command to operate properly and maintain consistent
+      speed, values should be chosen which will not exceed the motors’ capabilities.
+      When transitioning from one set speed to another, the controller will transition gradually
+      according to the rate of acceleration set by the ACC command.
     */
-    int8_t left_drive_power, right_drive_power;
+    int16_t left_drive_speed, right_drive_speed;
 
-    // The base power to drive the wheel with. This value is used in what
-    // ultimately is sent to the driveWithPower service.
-    int8_t current_power_;
-
-    int16_t current_angle_, angular_;
+    /*
+      Speed (in positions per second) is entered as a 16-bit hex value. The range of
+      allowed values is 0 to FFFF
+    */
+    int16_t angular_drive_speed;
 
     // True if Eddie only rotates in place
     bool rotate_;
 
-    // Used to cancel the movement of Eddie while running drive() or rotate()
+    // Used to get the value of velocities that were set in a callback
     bool interrupt_;
 
     // If true, we will issue moving commands such as drive() or rotate()
@@ -128,7 +127,6 @@ private:
 
     sem_t mutex_execute_;
     sem_t mutex_interrupt_;
-    sem_t mutex_state_;
     sem_t mutex_ping_;
     sem_t mutex_ir_;
 
@@ -139,14 +137,16 @@ private:
             eddiebot_msgs::srv::GetStatus::Response::SharedPtr res);
     void stop();
     void setAccelerationRate(int rate);
+    bool isWithinSafeDistance();
     void moveLinear(float linear);
-    void moveAngular(int16_t angular);
-    void moveLinearAngular(float linear, int16_t angular);
-    void drive(int8_t left, int8_t right);
+    void moveAngular(float angular);
+    void moveLinearAngular(float linear, float angular);
+    void drive(int16_t left, int16_t right);
     void rotate(int16_t angular);
     void updateCurrentPower(int8_t left, int8_t right);
     int8_t clipPower(int power_unit, float linear);
-    int16_t clipSpeed(int speed_unit, float linear);
+    int16_t clipSpeed(int32_t speed_unit);
+    int16_t clipAngularSpeed(int32_t speed_unit);
 };
 
 #endif	/* _EDDIE_CONTROLLER_H */

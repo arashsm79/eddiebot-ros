@@ -40,52 +40,39 @@
 using namespace std::chrono_literals;
 
 EddieController::EddieController(std::shared_ptr<rclcpp::Node> node_handle)
-    : node_handle_(node_handle), base_left_power_(60), base_right_power_(60),
-      base_rotation_power_(40), acceleration_power_(30), deceleration_power_(100),
-      min_power_(32), left_speed_(36), right_speed_(36),
-      rotation_speed_(36), acceleration_speed_(36), linear_scale_(1.0), angular_scale_(1.0) {
-  node_handle_->get_parameter_or("left_power", base_left_power_, base_left_power_);
-  node_handle_->get_parameter_or("right_power", base_right_power_, base_right_power_);
-  node_handle_->get_parameter_or("rotation_power", base_rotation_power_,
-                                 base_rotation_power_);
-  node_handle_->get_parameter_or("acceleration_power", acceleration_power_,
-                                 acceleration_power_);
-  node_handle_->get_parameter_or("deceleration_power", deceleration_power_,
-                                 deceleration_power_);
-  node_handle_->get_parameter_or("min_power", min_power_, min_power_);
-  node_handle_->get_parameter_or("left_speed", left_speed_, left_speed_);
-  node_handle_->get_parameter_or("right_speed", right_speed_, right_speed_);
+    : node_handle_(node_handle),  
+       acceleration_rate_(30), 
+       rotation_speed_(36), min_velocity_(36),
+      max_velocity(36), linear_scale_(1.0), angular_scale_(1.0) {
+
+  node_handle_->get_parameter_or("min_velocity", min_velocity_, min_velocity_);
+  node_handle_->get_parameter_or("max_velocity", max_velocity, max_velocity);
   node_handle_->get_parameter_or("rotation_speed", rotation_speed_,
                                  rotation_speed_);
-  node_handle_->get_parameter_or("acceleration_speed", acceleration_speed_,
-                                 acceleration_speed_);
-
+  node_handle_->get_parameter_or("acceleration_rate", acceleration_rate_,
+                                 acceleration_rate_);
   node_handle_->get_parameter_or("angular_scale", angular_scale_,
                                  angular_scale_);
   node_handle_->get_parameter_or("linear_scale", linear_scale_, linear_scale_);
+
   RCLCPP_INFO(node_handle_->get_logger(), "Parameters received.");
 
   sem_init(&mutex_execute_, 0, 1);
   sem_init(&mutex_interrupt_, 0, 1);
-  sem_init(&mutex_state_, 0, 1);
   sem_init(&mutex_ping_, 0, 1);
   sem_init(&mutex_ir_, 0, 1);
 
-  sem_wait(&mutex_state_);
   sem_wait(&mutex_interrupt_);
-
-  current_power_ = 16;
-  left_drive_power = 0;
-  right_drive_power = 0;
-  angular_ = 0;
+  left_drive_speed = 0;
+  right_drive_speed = 0;
+  angular_drive_speed = 0;
   rotate_ = false;
   process_ = false;
   last_cmd_time_ = node_handle_->get_clock()->now();
   interrupt_ = false;
-
   sem_post(&mutex_interrupt_);
-  sem_post(&mutex_state_);
-  RCLCPP_INFO(node_handle_->get_logger(), "Semaphores initiated");
+
+  RCLCPP_INFO(node_handle_->get_logger(), "Semaphores initiated.");
 
   velocity_sub_ =
       node_handle_->create_subscription<eddiebot_msgs::msg::Velocity>(
@@ -128,7 +115,7 @@ EddieController::EddieController(std::shared_ptr<rclcpp::Node> node_handle)
   eddie_reset_ = node_handle_->create_client<eddiebot_msgs::srv::ResetEncoder>(
       "reset_encoder");
 
-  setAccelerationRate(acceleration_speed_);
+  setAccelerationRate(acceleration_rate_);
 }
 
 // Receives the velocity command from the velocity topic and
@@ -137,7 +124,7 @@ EddieController::EddieController(std::shared_ptr<rclcpp::Node> node_handle)
 void EddieController::velocityCallback(
     const eddiebot_msgs::msg::Velocity::ConstSharedPtr message) {
   float linear = message->linear;
-  int16_t angular = message->angular;
+  float angular = message->angular;
 
   if (linear == 0 && angular == 0) {
     stop();
@@ -145,13 +132,12 @@ void EddieController::velocityCallback(
     moveLinear(linear);
   } else if (linear == 0 && angular != 0) {
     moveAngular(angular);
-  } else // if (linear!=0 && angular !=0)
-  {
+  } else { // if (linear!=0 && angular !=0)
     moveLinearAngular(linear, angular);
   }
 }
 
-// If there is an object close by, change the status
+// If there is an object close by, change the status and stop
 void EddieController::distanceCallback(
     const eddiebot_msgs::msg::Distances::ConstSharedPtr message) {
   sem_wait(&mutex_ping_);
@@ -166,7 +152,7 @@ void EddieController::distanceCallback(
   sem_post(&mutex_ping_);
 }
 
-// If there is an object close by, change the status
+// If there is an object close by, change the status and stop
 void EddieController::irCallback(
     const eddiebot_msgs::msg::Voltages::ConstSharedPtr message) {
   sem_wait(&mutex_ir_);
@@ -181,23 +167,30 @@ void EddieController::irCallback(
   sem_post(&mutex_ir_);
 }
 
-// Make sure Eddie is not about to contact anything.
-// If it is, then stop it.
+// Status to check if Eddie is not about to contact anything.
 bool EddieController::getStatus(
     eddiebot_msgs::srv::GetStatus::Request::SharedPtr req,
     eddiebot_msgs::srv::GetStatus::Response::SharedPtr res) {
   (void)req;
+
+  res->okay = isWithinSafeDistance();
+
+  return true;
+}
+
+bool EddieController::isWithinSafeDistance() {
   sem_wait(&mutex_ping_);
   sem_wait(&mutex_ir_);
+  bool ret = true;
 
   if (ping_distances_okay_ && ir_distances_okay_)
-    res->okay = true;
+    ret = true;
   else
-    res->okay = false;
+    ret = false;
 
   sem_post(&mutex_ping_);
   sem_post(&mutex_ir_);
-  return true;
+  return ret;
 }
 
 // Send a request to stop Eddie
@@ -219,10 +212,6 @@ void EddieController::stop() {
     RCLCPP_INFO(node_handle_->get_logger(), "EddiebotStop Service not available, waiting again...");
   }
   auto result = eddie_stop_->async_send_request(dist_req);
-
-  // Make sure the power that is used to drive
-  // the wheels is set to 0
-  current_power_ = 0;
 }
 
 void EddieController::setAccelerationRate(int rate) {
@@ -246,18 +235,17 @@ void EddieController::setAccelerationRate(int rate) {
 }
 
 // Called from the velocity callback.
-// Set the values for the left and right wheels' powers
+// Set the values for the left and right wheels' speeds
 // so that Eddie moves in a straight line.
 void EddieController::moveLinear(float linear) {
-  int8_t left, right;
 
-  // Make sure the power values are within the thresholds
-  left = clipPower(base_left_power_, linear);
-  right = clipPower(base_right_power_, linear);
+  // Calculate wheel velocities and convert meter per second to position per second
+  double left_command_speed  = (linear / WHEEL_RADIUS) / DISTANCE_PER_COUNT;
+  double right_command_speed = (linear / WHEEL_RADIUS) / DISTANCE_PER_COUNT;
 
   sem_wait(&mutex_interrupt_);
-  left_drive_power = left;
-  right_drive_power = right;
+  left_drive_speed = left_command_speed;
+  right_drive_speed = right_command_speed;
   // this is not a pure rotation
   rotate_ = false;
   process_ = true;
@@ -268,13 +256,15 @@ void EddieController::moveLinear(float linear) {
 
 // Called from the velocity callback.
 // Rotate the robot in place
-void EddieController::moveAngular(int16_t angular) {
+void EddieController::moveAngular(float angular) {
+
+  // Calculate angular velocities and convert meter per second to position per second
+  int16_t angular_command_speed = ((angular * WHEEL_SEPARATION / 2.0) / WHEEL_RADIUS) / DISTANCE_PER_COUNT;
+
   sem_wait(&mutex_interrupt_);
-  left_drive_power = 0;
-  right_drive_power = 0;
-  if (!rotate_)
-    current_power_ = 0;
-  angular_ = angular;
+  left_drive_speed = 0;
+  right_drive_speed = 0;
+  angular_drive_speed = angular_command_speed;
   rotate_ = true;
   process_ = true;
   // cancel other moving commands in favor of this new one.
@@ -283,23 +273,17 @@ void EddieController::moveAngular(int16_t angular) {
 }
 
 // Called from the velocity callback.
-// Set the values for the left and right wheels' powers
-// so that Eddie can move and turn
-void EddieController::moveLinearAngular(float linear, int16_t angular) {
-  int8_t left, right;
-  if (angular > 0) {
-    angular = angular % 360;
-    left = clipPower(base_left_power_, linear);
-    right = left - (int8_t)(left * (float)angular / 180);
-  } else {
-    angular = angular % 360;
-    right = clipPower(base_right_power_, linear);
-    left = right - (int8_t)(right * (float)abs(angular) / 180);
-  }
+// Set the values for the left and right wheels' speeds
+// so that Eddie can do arcs
+void EddieController::moveLinearAngular(float linear, float angular) {
+
+  // Calculate wheel velocities and convert meter per second to position per second
+  double left_command_speed  = ((linear - angular * WHEEL_SEPARATION / 2.0) / WHEEL_RADIUS) / DISTANCE_PER_COUNT;
+  double right_command_speed = ((linear + angular * WHEEL_SEPARATION / 2.0) / WHEEL_RADIUS) / DISTANCE_PER_COUNT;
 
   sem_wait(&mutex_interrupt_);
-  left_drive_power = left;
-  right_drive_power = right;
+  left_drive_speed  = left_command_speed;
+  right_drive_speed = right_command_speed;
   // this is not a pure rotation
   rotate_ = false;
   process_ = true;
@@ -308,254 +292,65 @@ void EddieController::moveLinearAngular(float linear, int16_t angular) {
   sem_post(&mutex_interrupt_);
 }
 
-void EddieController::drive(int8_t left, int8_t right) {
+// Send request to speed srv passing in the velocities of each wheel
+void EddieController::drive(int16_t left, int16_t right) {
   sem_wait(&mutex_execute_);
 
-  sem_wait(&mutex_interrupt_);
-  interrupt_ = false;
-  bool cancel = false;
-  sem_post(&mutex_interrupt_);
-
-  auto power_req =
-      std::make_shared<eddiebot_msgs::srv::DriveWithPower::Request>();
+  auto drive_with_speed_req = std::make_shared<eddiebot_msgs::srv::DriveWithSpeed::Request>();
 
   rclcpp::Time now;
-  bool shift = true;
-  int8_t previous_power = 0;
 
-  while (rclcpp::ok() && shift && !cancel) {
-    // issue power commands with a maximum frequency of 10Hz (every 0.1 seconds)
-    now = node_handle_->get_clock()->now();
-    if ((now.seconds() - last_cmd_time_.seconds()) >= 0.1) {
-      previous_power = current_power_;
-      updateCurrentPower(left, right);
-      RCLCPP_INFO(node_handle_->get_logger(), "prev: %hhd, curr: %hhd, left: %d, right: %d", previous_power, current_power_, left, right);
+  drive_with_speed_req->left  = clipSpeed(left);
+  drive_with_speed_req->right = clipSpeed(right);
 
-      if (abs(left) < abs(right)) {
-        power_req->left = current_power_;
-        power_req->right = (int8_t)(current_power_ * ((double)right / left));
-      } else {
-        power_req->right = current_power_;
-        power_req->left = (int8_t)(current_power_ * ((double)left / right));
-      }
+  RCLCPP_INFO(node_handle_->get_logger(), "wheel vel: left = %d, right = %d", drive_with_speed_req->left, drive_with_speed_req->right);
 
-      while (!eddie_drive_power_->wait_for_service(1s)) {
-        if (!rclcpp::ok()) {
-          RCLCPP_ERROR(node_handle_->get_logger(), "Interrupted while waiting for the service. Exiting.");
-          return;
-        }
-        RCLCPP_INFO(node_handle_->get_logger(), "Service not available, waiting again...");
-      }
-      auto result = eddie_drive_power_->async_send_request(power_req);
-      if (rclcpp::spin_until_future_complete(node_handle_, result) ==
-          rclcpp::FutureReturnCode::SUCCESS) {
-        RCLCPP_INFO(node_handle_->get_logger(), "Sent Eddie drive power request to service.");
-        // command was successful. Update the last command time.
-        last_cmd_time_ = node_handle_->get_clock()->now();
-      } else {
-        RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: at trying to drive Eddie.");
-        // command didn't succeed. Change back the current power to its previous value
-        current_power_ = previous_power;
-      }
-
-      // continue increasing/decreasing the current_power until it matches one of the desired wheel powers.
-      if (left != current_power_ && right != current_power_)
-        shift = true;
-      else
-        shift = false;
-    }
-    rclcpp::spin_some(node_handle_);
-    usleep(1000);
-    sem_wait(&mutex_interrupt_);
-    cancel = interrupt_;
-    sem_post(&mutex_interrupt_);
-  }
-
-  sem_post(&mutex_execute_);
-}
-
-void EddieController::rotate(int16_t angular) {
-  sem_wait(&mutex_execute_);
-  sem_wait(&mutex_interrupt_);
-  interrupt_ = false;
-  angular_ = 0;
-  bool cancel = interrupt_;
-  sem_post(&mutex_interrupt_);
-
-  // angular = 0.75 * angular;
-  auto power_req = std::make_shared<eddiebot_msgs::srv::DriveWithPower::Request>();
-  auto heading_req = std::make_shared<eddiebot_msgs::srv::GetHeading::Request>();
-  rclcpp::Time now;
-
-  bool shift = true, headed = false;
-  (void) headed;
-  int16_t init_angle = 0, target_angle;
-  int8_t left, right, previous_power;
-
-  auto reset_req = std::make_shared<eddiebot_msgs::srv::ResetEncoder::Request>();
-
-  while (!eddie_heading_->wait_for_service(1s)) {
+  while (!eddie_drive_speed_->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(node_handle_->get_logger(), "Interrupted while waiting for the service. Exiting.");
       return;
     }
     RCLCPP_INFO(node_handle_->get_logger(), "Service not available, waiting again...");
   }
-  auto future = eddie_heading_->async_send_request(heading_req);
-  if (rclcpp::spin_until_future_complete(node_handle_, future) ==
-      rclcpp::FutureReturnCode::SUCCESS) {
-    RCLCPP_INFO(node_handle_->get_logger(), "Sent Eddie heading request to service.");
+  auto result = eddie_drive_speed_->async_send_request(drive_with_speed_req);
+  if (rclcpp::spin_until_future_complete(node_handle_, result) == rclcpp::FutureReturnCode::SUCCESS) {
+    RCLCPP_INFO(node_handle_->get_logger(), "Sent Eddie drive power request to service.");
   } else {
-    RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: at trying to get heading Eddie.");
-  }
-
-  if (!future.valid()) {
-    RCLCPP_ERROR(node_handle_->get_logger(), "Unable to get current Heading value. Encoder will now be reseted.");
-    sem_post(&mutex_execute_);
-    return;
-  } else {
-    auto result = future.get();
-    init_angle = result->heading;
-    if (init_angle > 3736)
-      init_angle -= 4096;
-  }
-  target_angle = init_angle + angular;
-
-  left = angular > 0 ? base_rotation_power_ : -1 * base_rotation_power_;
-  right = angular > 0 ? -1 * base_rotation_power_ : base_rotation_power_;
-
-  while (rclcpp::ok() && shift && !cancel) {
-    now = node_handle_->get_clock()->now();
-    if ((now.seconds() - last_cmd_time_.seconds()) >= 0.1) {
-      while (!eddie_heading_->wait_for_service(1s)) {
-        if (!rclcpp::ok()) {
-          RCLCPP_ERROR(node_handle_->get_logger(), "Interrupted while waiting for the service. Exiting.");
-          return;
-        }
-        RCLCPP_INFO(node_handle_->get_logger(), "Service not available, waiting again...");
-      }
-      auto future = eddie_heading_->async_send_request(heading_req);
-      if (rclcpp::spin_until_future_complete(node_handle_, future) ==
-          rclcpp::FutureReturnCode::SUCCESS) {
-        RCLCPP_INFO(node_handle_->get_logger(), "Sent Eddie heading request to service.");
-      } else {
-        RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: at trying to get heading Eddie.");
-      }
-      current_angle_ = future.get()->heading;
-      if (current_angle_ > 3736)
-        current_angle_ -= 4096;
-
-      if (angular > 0 && current_angle_ < init_angle)
-        current_angle_ = init_angle > 0 ? current_angle_ + 360 : current_angle_;
-      else if (angular < 0 && current_angle_ > init_angle)
-        current_angle_ = init_angle < 0 ? current_angle_ - 360 : current_angle_;
-
-      init_angle = current_angle_;
-
-      if (angular > 0 && current_angle_ < target_angle)
-        shift = true;
-      else if (angular < 0 && current_angle_ > target_angle)
-        shift = true;
-      else
-        shift = false;
-
-      if (!shift) {
-        auto dist_req =
-            std::make_shared<eddiebot_msgs::srv::StopAtDistance::Request>();
-
-        dist_req->distance = 2;
-        while (!eddie_stop_->wait_for_service(1s)) {
-          if (!rclcpp::ok()) {
-            RCLCPP_ERROR(node_handle_->get_logger(), "Interrupted while waiting for the service. Exiting.");
-            return;
-          }
-          RCLCPP_INFO(node_handle_->get_logger(), "Service not available, waiting again...");
-        }
-        auto result = eddie_stop_->async_send_request(dist_req);
-        if (rclcpp::spin_until_future_complete(node_handle_, result) == rclcpp::FutureReturnCode::SUCCESS) {
-          RCLCPP_INFO(node_handle_->get_logger(), "Sent Eddie stop request to service.");
-        } else {
-          RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: at trying to stop Eddie.");
-        }
-        current_power_ = 0;
-      } else {
-        previous_power = current_power_;
-        updateCurrentPower(left, right);
-        power_req->left = angular > 0 ? current_power_ : -1 * current_power_;
-        power_req->right = angular > 0 ? -1 * current_power_ : current_power_;
-        while (!eddie_drive_power_->wait_for_service(1s)) {
-          if (!rclcpp::ok()) {
-            RCLCPP_ERROR(node_handle_->get_logger(), "Interrupted while waiting for the service. Exiting.");
-            return;
-          }
-          RCLCPP_INFO(node_handle_->get_logger(), "Service not available, waiting again...");
-        }
-        auto result = eddie_drive_power_->async_send_request(power_req);
-        if (rclcpp::spin_until_future_complete(node_handle_, result) ==
-            rclcpp::FutureReturnCode::SUCCESS) {
-          RCLCPP_INFO(node_handle_->get_logger(), "Sent Eddie drive power request to service.");
-          last_cmd_time_ = node_handle_->get_clock()->now();
-        } else {
-          RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: at trying to drive Eddie.");
-          current_power_ = previous_power;
-        }
-      }
-    }
-    rclcpp::spin_some(node_handle_);
-    usleep(1000);
-    sem_wait(&mutex_interrupt_);
-    cancel = interrupt_;
-    if (!rotate_)
-      current_power_ = 0;
-    sem_post(&mutex_interrupt_);
+    RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: at trying to drive Eddie.");
   }
 
   sem_post(&mutex_execute_);
 }
 
-void EddieController::updateCurrentPower(int8_t left, int8_t right) {
-  // Move forward
-  if (left > 0 && right > 0) {
-    if (current_power_ > -1 * min_power_ && current_power_ < min_power_)
-      current_power_ = min_power_;
-    else if (current_power_ > acceleration_power_ + left &&
-             current_power_ > acceleration_power_ + right)
-      current_power_ = left > right ? left - acceleration_power_
-                                    : right - acceleration_power_;
-    else if (current_power_ < -1 * min_power_)
-      current_power_ += deceleration_power_ / 10;
-    else
-      current_power_ += acceleration_power_ / 10;
+// Rotate Eddie in place.
+void EddieController::rotate(int16_t angular) {
+  sem_wait(&mutex_execute_);
 
-    if (current_power_ > left || current_power_ > right)
-      current_power_ = left > right ? left : right;
+  auto rotate_req = std::make_shared<eddiebot_msgs::srv::Rotate::Request>();
 
-    // Move backward
-  } else if (left < 0 && right < 0) {
-    if (current_power_ > -1 * min_power_ && current_power_ < min_power_)
-      current_power_ = -1 * min_power_;
-    else if (current_power_ < left - acceleration_power_ &&
-             current_power_ < right - acceleration_power_)
-      current_power_ = left > right ? left - acceleration_power_
-                                    : right - acceleration_power_;
-    else if (current_power_ > min_power_)
-      current_power_ -= deceleration_power_ / 10;
-    else
-      current_power_ -= acceleration_power_ / 10;
+  rclcpp::Time now;
 
-    if (current_power_ < left || current_power_ < right)
-      current_power_ = left < right ? left : right;
+  rotate_req->angle  = angular > 0 ? 32000 : -32000;
+  rotate_req->speed  = clipAngularSpeed(angular);
 
-    // Rotate
-  } else {
-    if (current_power_ < min_power_)
-      current_power_ = min_power_;
-    else if (current_power_ < left || current_power_ < right)
-      current_power_ += acceleration_power_ / 10;
+  RCLCPP_INFO(node_handle_->get_logger(), "angular: %d, dist: %lf, %lf", angular, DISTANCE_PER_COUNT, angular / DISTANCE_PER_COUNT);
+  RCLCPP_INFO(node_handle_->get_logger(), "wheel angular speed: angle = %d, speed = %d", rotate_req->angle, rotate_req->speed);
 
-    if (current_power_ > left && current_power_ > right)
-      current_power_ = left > right ? left : right;
+  while (!eddie_turn_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(node_handle_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+      return;
+    }
+    RCLCPP_INFO(node_handle_->get_logger(), "Service not available, waiting again...");
   }
+  auto result = eddie_turn_->async_send_request(rotate_req);
+  if (rclcpp::spin_until_future_complete(node_handle_, result) == rclcpp::FutureReturnCode::SUCCESS) {
+    RCLCPP_INFO(node_handle_->get_logger(), "Sent Eddie drive power request to service.");
+  } else {
+    RCLCPP_ERROR(node_handle_->get_logger(), "ERROR: at trying to drive Eddie.");
+  }
+
+  sem_post(&mutex_execute_);
 }
 
 // Make sure the power value is between -127 (0x80) and 127 (0x7F)
@@ -571,13 +366,29 @@ int8_t EddieController::clipPower(int power_unit, float linear) {
 }
 
 // Make sure the power value is between 32767 (0x8000) and -32767 (0x7FFF)
-int16_t EddieController::clipSpeed(int speed_unit, float linear) {
+int16_t EddieController::clipSpeed(int32_t speed_command) {
   int16_t speed;
 
-  if (speed_unit * abs(linear) > 32767)
-    speed = linear > 0 ? 32767 : -32767;
+  if (speed_command  > 32767)
+    speed = 32767;
+  else if (speed_command < -32767)
+    speed = -32767;
   else
-    speed = speed_unit * linear;
+    speed = speed_command;
+
+  return speed;
+}
+
+// Make sure the power value is between 65536 (0xFFFF) and 0
+int16_t EddieController::clipAngularSpeed(int32_t angular_speed_command) {
+  uint16_t speed;
+
+  int32_t abs_angular_speed_command = abs(angular_speed_command);
+
+  if (abs_angular_speed_command  > 65535)
+    speed = 65535;
+  else
+    speed = abs_angular_speed_command;
 
   return speed;
 }
@@ -592,10 +403,10 @@ void EddieController::execute() {
     if (ex) {
       sem_wait(&mutex_interrupt_);
       process_ = false;
-      int8_t l = left_drive_power;
-      int8_t r = right_drive_power;
+      int16_t l = left_drive_speed;
+      int16_t r = right_drive_speed;
       bool rot = rotate_;
-      int16_t angular = angular_;
+      int16_t angular = angular_drive_speed;
       sem_post(&mutex_interrupt_);
       if (rot)
         rotate(angular);
@@ -608,9 +419,6 @@ void EddieController::execute() {
   }
 }
 
-/*
- *
- */
 int main(int argc, char **argv) {
   rclcpp::init(argc, argv);
   auto node_handle = rclcpp::Node::make_shared("eddie_controller");

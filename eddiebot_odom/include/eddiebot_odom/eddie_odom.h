@@ -18,7 +18,7 @@
 // Wheel radius in meters
 #define WHEEL_RADIUS    0.1524
 // the distance of a wheel move forward when encoder increased by 1
-#define DISTANCE_PER_COUNT      ((PI * WHEEL_RADIUS) / COUNTS_PER_REVOLUTION)
+#define DISTANCE_PER_COUNT      ((TWOPI * WHEEL_RADIUS) / COUNTS_PER_REVOLUTION)
 // two wheels center-to-center distance
 #define WHEEL_BASE      0.39
 

@@ -501,7 +501,7 @@ int main(int argc, char **argv) {
   while (rclcpp::ok()) {
     // eddie.publishPingData();
     // eddie.publishADCData();
-    eddie.publishEncodersData();
+    // eddie.publishEncodersData();
 
     rclcpp::spin_some(node_handle);
     loop_rate.sleep();
