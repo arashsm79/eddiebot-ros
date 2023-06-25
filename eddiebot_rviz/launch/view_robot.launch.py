@@ -30,6 +30,11 @@ ARGUMENTS = [
             default_value='',
             description='Robot namespace'
             ),
+        DeclareLaunchArgument(
+            'config',
+            default_value='robot.rviz',
+            description='rviz config to use'
+            ),
         ]
 
 
@@ -39,7 +44,7 @@ def generate_launch_description():
     pkg_eddiebot_description = get_package_share_directory('eddiebot_description')
 
     rviz2_config = PathJoinSubstitution(
-        [pkg_eddiebot_viz, 'rviz', 'robot.rviz'])
+        [pkg_eddiebot_viz, 'rviz', LaunchConfiguration('config')])
     description_launch = PathJoinSubstitution(
         [pkg_eddiebot_description, 'launch', 'robot_description.launch.py']
     )

@@ -23,7 +23,7 @@ ARGUMENTS = [
                           description='Launch rtabmap_viz'),
     DeclareLaunchArgument('qos', default_value='2',
                           description='QoS used for input sensor topics'),
-    DeclareLaunchArgument('localization', default_value='true',
+    DeclareLaunchArgument('localization', default_value='false',
                           choices=['true', 'false'],
                           description='Localize only, do not change loaded map')
 
@@ -53,14 +53,18 @@ def generate_launch_description():
 
             # rtabmap parameters
             'Optimizer/Strategy': '1',
-            'Optimizer/GravitySigma': '0.0',
 
             'RGBD/ProximityBySpace': 'false',
+            'Reg/Force3DoF': 'true',
+            'Vis/MinInliers': '12',
+
             'RGBD/AngularUpdate': '0.01',
             'RGBD/LinearUpdate': '0.01',
             'RGBD/OptimizeFromGraphEnd': 'false',
-            'Reg/Force3DoF': 'true',
-            'Vis/MinInliers': '12',
+
+            # 'Grid/FromDepth': 'true',
+            # 'Grid/MaxObstacleHeight': '0.7',
+            # 'Reg/Strategy': '0'
     }
     rtabmap_remappings = [
             ('rgb/image', '/image_raw'),
