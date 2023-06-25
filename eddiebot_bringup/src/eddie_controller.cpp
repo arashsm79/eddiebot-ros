@@ -330,7 +330,8 @@ void EddieController::rotate(int16_t angular) {
 
   rclcpp::Time now;
 
-  rotate_req->angle  = angular > 0 ? 32000 : -32000;
+  // eddie's firmware takes inverted signed angle
+  rotate_req->angle  = angular > 0 ? -32000 : 32000;
   rotate_req->speed  = clipAngularSpeed(angular);
 
   RCLCPP_INFO(node_handle_->get_logger(), "angular: %d, dist: %lf, %lf", angular, DISTANCE_PER_COUNT, angular / DISTANCE_PER_COUNT);

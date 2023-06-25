@@ -499,9 +499,9 @@ int main(int argc, char **argv) {
   rclcpp::Rate loop_rate(5);
 
   while (rclcpp::ok()) {
-    // eddie.publishPingData();
-    // eddie.publishADCData();
-    // eddie.publishEncodersData();
+    eddie.publishPingData();
+    eddie.publishADCData();
+    eddie.publishEncodersData();
 
     rclcpp::spin_some(node_handle);
     loop_rate.sleep();

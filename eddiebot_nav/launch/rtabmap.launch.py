@@ -21,6 +21,8 @@ ARGUMENTS = [
     DeclareLaunchArgument('use_rtabmap_viz', default_value='false',
                           choices=['true', 'false'],
                           description='Launch rtabmap_viz'),
+    DeclareLaunchArgument('qos', default_value='2',
+                          description='QoS used for input sensor topics'),
     DeclareLaunchArgument('localization', default_value='true',
                           choices=['true', 'false'],
                           description='Localize only, do not change loaded map')
@@ -34,6 +36,79 @@ def generate_launch_description():
     pkg_eddiebot_nav = get_package_share_directory(
         'eddiebot_nav')
 
+    rtabmap_parameters = {
+            'use_sim_time': LaunchConfiguration('use_sim_time'),
+
+            # rtabmap ros wrapper parameters
+            'frame_id': 'base_footprint',
+            'map_frame_id': 'map',
+            'subscribe_depth': True,
+            'subscribe_scan': True,
+            'subscribe_rgbd': False,
+            'qos_image': LaunchConfiguration('qos'),
+            'qos_scan': LaunchConfiguration('qos'),
+            'use_action_for_goal': True,
+            'approx_sync': True,
+            'queue_size': 30,
+
+            # rtabmap parameters
+            'Optimizer/Strategy': '1',
+            'Optimizer/GravitySigma': '0.0',
+
+            'RGBD/ProximityBySpace': 'false',
+            'RGBD/AngularUpdate': '0.01',
+            'RGBD/LinearUpdate': '0.01',
+            'RGBD/OptimizeFromGraphEnd': 'false',
+            'Reg/Force3DoF': 'true',
+            'Vis/MinInliers': '12',
+    }
+    rtabmap_remappings = [
+            ('rgb/image', '/image_raw'),
+            ('rgb/camera_info', '/camera_info'),
+            ('depth/image', '/depth/image_raw'),
+    ]
+    rtabmap_arguments = ['-d', '--ros-args', '--log-level', 'Warn']
+
+    # SLAM mode:
+    rtabmap_slam = Node(
+            condition=UnlessCondition(LaunchConfiguration('localization')),
+            package='rtabmap_slam', executable='rtabmap', output='screen',
+            parameters=[rtabmap_parameters],
+            remappings=rtabmap_remappings,
+            arguments=rtabmap_arguments
+    )
+
+    # Localization mode:
+    rtabmap_localization = Node(
+           condition=IfCondition(LaunchConfiguration('localization')),
+           package='rtabmap_slam', executable='rtabmap', output='screen',
+           parameters=[rtabmap_parameters,
+                       {
+                           'Mem/IncrementalMemory': 'False',
+                           'Mem/InitWMWithAllNodes': 'True'
+                       }],
+           remappings=rtabmap_remappings
+    )
+
+    rtabmap_viz = Node(
+        package='rtabmap_viz',
+        executable='rtabmap_viz',
+        output='screen',
+        parameters=[rtabmap_parameters],
+        remappings=rtabmap_remappings,
+        condition=IfCondition(LaunchConfiguration('use_rtabmap_viz'))
+    )
+
+    ld = LaunchDescription(ARGUMENTS)
+    ld.add_action(rtabmap_slam)
+    ld.add_action(rtabmap_localization)
+    ld.add_action(rtabmap_viz)
+    return ld
+
+    #
+    # Example of how odometry merging could be done.
+    #
+
     # Synchronize the depth and rgb images for old rgbd sensors like Kinect 360.
     rgbd_sync = Node(
         package='rtabmap_sync',
@@ -41,12 +116,16 @@ def generate_launch_description():
         output='screen',
         parameters=[
             {'use_sim_time': LaunchConfiguration('use_sim_time')},
-            {'approx_sync': True},
+            {'approx_sync': False},
         ],
         remappings=[
-            ('rgb/image', '/kinect_rgbd_camera/image'),
-            ('rgb/camera_info', '/kinect_rgbd_camera/camera_info'),
-            ('depth/image', '/kinect_rgbd_camera/depth_image'),
+            # input
+            ('rgb/image', '/image_raw'),
+            ('rgb/camera_info', '/camera_info'),
+            ('depth/image', '/depth/image_raw'),
+            ('depth/camera_info', '/depth/camera_info'),
+
+            # output
             ('rgbd_image', '/kinect_rgbd_camera/rgbd_image'),
             ('rgbd_image/compressed', '/kinect_rgbd_camera/rgbd_image/compressed'),
         ]
@@ -62,12 +141,12 @@ def generate_launch_description():
             {'frame_id': 'base_footprint'},
             {'odom_frame_id': 'odom'},
             {'publish_tf': False},
-            {'subscribe_rgbd': True},
+            {'subscribe_rgbd': False},
+            {'approx_sync': True},
             {'Vis/InlierDistance': '0.05'}
         ],
-        remappings=[
-            ('rgbd_image', '/kinect_rgbd_camera/rgbd_image'),
-            ('rgbd_image/compressed', '/kinect_rgbd_camera/rgbd_image/compressed'),
+        remappings=rtabmap_remappings + [
+            # output
             ('odom', '/vis_odom')
         ]
     )
@@ -87,9 +166,6 @@ def generate_launch_description():
             ('odometry/filtered', '/odom')
         ]
     )
-
-    ld = LaunchDescription(ARGUMENTS)
+    ld.add_action(rgbd_odometry)
     ld.add_action(robot_localization)
     ld.add_action(rgbd_sync)
-    ld.add_action(rgbd_odometry)
-    return ld
