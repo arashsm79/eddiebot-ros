@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-  
-  <node pkg="eddiebot_virtual_driver" type="eddiebot_virtual_driver" name="eddiebot_virtual_driver">
-    <remap from="cmd_vel" to="/eddie/command_velocity"/>
-  </node>
-
-</launch>
