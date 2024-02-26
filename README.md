@@ -1,6 +1,9 @@
 # Eddiebot ROS
 > ROS2 packages for Parallax Eddie robot along with simulations using Gazebo (formerly ignition gazebo)
 
+
+<p align="center"><img src="https://github.com/arashsm79/eddiebot-ros/assets/57039957/0ad1ecc0-379b-4573-b4df-2ff19c9f3b11"></p>
+
 For an in depth tutorial on how to use this package check out the accompanying tutorial: [robotics lab](https://github.com/arashsm79/robotics-lab)
 
 * [eddiebot_bringup](https://github.com/arashsm79/eddiebot-ros/tree/main/eddiebot_bringup): The driver for the Eddie robot board. It establishes a connection to the board using UART and acts as a bridge between ROS2 and Eddie commands that the firmware on the board understands. For more details about the commands please checkout the documentation directory.
@@ -13,4 +16,8 @@ For an in depth tutorial on how to use this package check out the accompanying t
 * [eddiebot_vel_controller](https://github.com/arashsm79/eddiebot-ros/tree/main/eddiebot_vel_controller): A converter between different velocity types.
 
 
-
+![gaz](/assets/eddie-gazebo.png)
+![rviz](/assets/rviz.png)
+![maze](/assets/eddie-maze.png)
+![nav](/assets/nav.png)
+https://github.com/arashsm79/eddiebot-ros/assets/57039957/af5bc3b8-e1a9-4ce3-84b5-ed4566440294
