@@ -29,7 +29,7 @@ https://github.com/arashsm79/eddiebot-ros/assets/57039957/af5bc3b8-e1a9-4ce3-84b
 - How to convert a legacy ROS1 codebase to ROS2
 - Example of hooks for setting GZ_SIM_RESOURCE_PATH
 - Robot description launch with robot_state_publisher, joint_state_publisher, and joint_state_publisher_gui
-- Kinect, Depth, Ultrasonic and infrared sensors in new Gazebo (`gpu_lidar`, `gz::sim::systems::Sensors`, `gpu_lidar`, `rgbd_camera`, `gz-sim-sensors-system`)
+- Kinect, Depth, Ultrasonic and infrared sensors in new Gazebo (`gpu_lidar`, `gz::sim::systems::Sensors`, `rgbd_camera`, `gz-sim-sensors-system`)
 - Use of `gz-sim-diff-drive-system` `gz::sim::systems::DiffDrive` for differential drive control.
 - Employing xacro files for easier management of robot structure defitnition.
 - Launch files for launching Gazebo and Spawning a robot using `ros_gz_sim` and `ros_gz`
